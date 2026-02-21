@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>User Dashboard</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+    }
+
+    .section {
+      margin-bottom: 40px;
+    }
+
+    label {
+      font-weight: bold;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin: 8px 0 15px;
+      box-sizing: border-box; 
+    }
+
+    button {
+      padding: 10px 20px;
+      background: #1d4ed8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid #ccc;
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: center;
+    }
+
+    .pending { color: orange; }
+    .resolved { color: green; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>User Dashboard</h2>
+
+  <!-- 🔹 Complaint Registration Section -->
+  <div class="section">
+    <h3>Register a Complaint</h3>
+
+    <form onsubmit="registerComplaint(event)">
+      <label>Crime Type</label>
+      <select required>
+        <option value="">Select</option>
+        <option>Theft</option>
+        <option>Accident</option>
+        <option>Cyber Crime</option>
+        <option>Harassment</option>
+      </select>
+
+      <label>Description</label>
+      <textarea required></textarea>
+
+      <label>Location</label>
+      <input type="text" required>
+
+      <button type="submit">Submit Complaint</button>
+    </form>
+  </div>
+
+  <!-- 🔹 Complaint Status Section -->
+  <div class="section">
+    <h3>My Complaints</h3>
+
+    <table>
+      <tr>
+        <th>Crime Type</th>
+        <th>Description</th>
+        <th>Location</th>
+        <th>Status</th>
+      </tr>
+
+      <tr>
+        <td>Theft</td>
+        <td>Mobile stolen</td>
+        <td>YYYY</td>
+        <td class="pending">Pending</td>
+      </tr>
+
+      <tr>
+        <td>Accident</td>
+        <td>Hit and run</td>
+        <td>XXX</td>
+        <td class="resolved">Resolved</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<script>
+function registerComplaint(e) {
+  e.preventDefault();
+
+  const crimeType = e.target[0].value;
+  const description = e.target[1].value;
+  const Location = e.target[2].value;
+
+  const table = document.querySelector("table");
+
+  const row = table.insertRow();
+  row.insertCell(0).innerText = crimeType;
+  row.insertCell(1).innerText = description;
+  row.insertCell(2).innerText = Location;
+
+  const statusCell = row.insertCell(3);
+  statusCell.innerText = "Pending";
+  statusCell.style.color = "orange";
+
+  e.target.reset();
+}
+</script>
+
+
+</body>
+</html>
