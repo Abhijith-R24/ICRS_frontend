@@ -1,20 +1,24 @@
+import { registerUser } from "@/.vscode/services/auth";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
-  View,
+  Alert,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
+  View,
 } from "react-native";
-import { router } from "expo-router";
-import React, { useState } from "react";
 
 export default function RegisterScreen() {
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const handleSubmit = () => {
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
@@ -22,6 +26,7 @@ export default function RegisterScreen() {
       return;
     }
     if (
+      !fullName.trim() ||
       !email.trim() ||
       !password.trim() ||
       !confirmPassword.trim() ||
@@ -30,20 +35,53 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Please fill all required fields");
       return;
     }
-    router.replace("/login");
 
-    setEmail("");
-    setPassword("");
-    setConfirmPassword("");
-    setPhone("");
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await registerUser({
+        name: fullName,
+        email,
+        password,
+        phone: "+91" + phone,
+      });
+
+      setFullName("");
+      setEmail("");
+      setPassword("");
+      setConfirmPassword("");
+      setPhone("");
+      Alert.alert("Success", "Registered successfully!", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/login"),
+        },
+      ]);
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      Alert.alert(
+        "Registration Failed",
+        error.response?.data?.message ||
+          error.message ||
+          "Something went wrong",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   const isFormValid =
+    fullName.trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
     phone.trim() !== "" &&
     phone.trim().length === 10 &&
     confirmPassword.trim() !== "" &&
-    password === confirmPassword;
+    password === confirmPassword &&
+    !loading;
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
@@ -52,6 +90,8 @@ export default function RegisterScreen() {
         style={styles.input}
         placeholder="Full Name"
         keyboardType="default"
+        value={fullName}
+        onChangeText={setFullName}
       />
       <TextInput
         style={styles.input}
