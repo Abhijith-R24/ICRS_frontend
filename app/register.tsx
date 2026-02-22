@@ -40,6 +40,10 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
+    if (phone.trim().length !== 10) {
+      Alert.alert("Invalid phone number");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -124,8 +128,16 @@ export default function RegisterScreen() {
           keyboardType="numeric"
           maxLength={10}
           value={phone}
-          onChangeText={setPhone}
+          onChangeText={(text) => {
+            const numericText = text.replace(/[^0-9]/g, "").slice(0, 10);
+            setPhone(numericText);
+          }}
         />
+      </View>
+      <View style={styles.errorContainer}>
+      {phone.trim().length > 0 && phone.trim().length <10  &&(
+        <Text style={styles.errorText}>Enter valid 10 digit phone number</Text>
+      )}
       </View>
       <TouchableOpacity
         style={styles.button}
@@ -202,4 +214,13 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     fontWeight: "bold",
   },
+  errorContainer: {
+    marginBottom: 15,
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    textAlign: "left",
+  }
+  
 });
