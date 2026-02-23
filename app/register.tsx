@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -22,7 +23,11 @@ export default function RegisterScreen() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
+      if (Platform.OS === "web") {
+        alert("Please enter a valid email address");
+      } else {
+        Alert.alert("Error", "Please enter a valid email address");
+      }
       return;
     }
     if (
@@ -32,47 +37,74 @@ export default function RegisterScreen() {
       !confirmPassword.trim() ||
       !phone.trim()
     ) {
-      Alert.alert("Error", "Please fill all required fields");
+      if (Platform.OS === "web") {
+        alert("Please fill all required fields");
+      } else {
+        Alert.alert("Error", "Please fill all required fields");
+      }
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
+      if (Platform.OS === "web") {
+        alert("Passwords do not match");
+      } else {
+        Alert.alert("Error", "Passwords do not match");
+      }
       return;
     }
     if (phone.trim().length !== 10) {
-      Alert.alert("Invalid phone number");
+      if (Platform.OS === "web") {
+        alert("Invalid phone number");
+      } else {
+        Alert.alert("Invalid phone number");
+      }
       return;
     }
 
     setLoading(true);
     try {
       const response = await registerUser({
-        name: fullName,
+        username: fullName,
         email,
         password,
         phone: "+91" + phone,
       });
+      console.log("Registration successful:", response.data);
 
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
-      Alert.alert("Success", "Registered successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/login"),
-        },
-      ]);
+
+      if (Platform.OS === "web") {
+        // On web, use window.location for more reliable navigation
+        console.log("Web registration successful, redirecting to login");
+        window.location.href = "/login";
+      } else {
+        // On mobile, use Alert.alert with button callback
+        Alert.alert("Success", "Registered successfully!", [
+          {
+            text: "OK",
+            onPress: () => router.replace("/login"),
+          },
+        ]);
+      }
     } catch (error: any) {
       console.error("Registration error:", error);
-      Alert.alert(
-        "Registration Failed",
+      console.error("Error response:", error.response);
+
+      const errorMessage =
         error.response?.data?.message ||
-          error.message ||
-          "Something went wrong",
-      );
+        error.message ||
+        "Something went wrong";
+
+      if (Platform.OS === "web") {
+        alert(`Registration Failed: ${errorMessage}`);
+      } else {
+        Alert.alert("Registration Failed", errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -93,6 +125,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Full Name"
+        placeholderTextColor="#999"
         keyboardType="default"
         value={fullName}
         onChangeText={setFullName}
@@ -100,6 +133,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Email"
+        placeholderTextColor="#999"
         keyboardType="email-address"
         autoCapitalize="none"
         value={email}
@@ -108,6 +142,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Password "
+        placeholderTextColor="#999"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -115,6 +150,7 @@ export default function RegisterScreen() {
       <TextInput
         style={styles.input}
         placeholder="Confirm Password"
+        placeholderTextColor="#999"
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -125,6 +161,7 @@ export default function RegisterScreen() {
         <TextInput
           style={styles.phoneInput}
           placeholder="Phone Number"
+          placeholderTextColor="#999"
           keyboardType="numeric"
           maxLength={10}
           value={phone}
@@ -135,9 +172,11 @@ export default function RegisterScreen() {
         />
       </View>
       <View style={styles.errorContainer}>
-      {phone.trim().length > 0 && phone.trim().length <10  &&(
-        <Text style={styles.errorText}>Enter valid 10 digit phone number</Text>
-      )}
+        {phone.trim().length > 0 && phone.trim().length < 10 && (
+          <Text style={styles.errorText}>
+            Enter valid 10 digit phone number
+          </Text>
+        )}
       </View>
       <TouchableOpacity
         style={styles.button}
@@ -221,6 +260,5 @@ const styles = StyleSheet.create({
     color: "red",
     fontSize: 14,
     textAlign: "left",
-  }
-  
+  },
 });
