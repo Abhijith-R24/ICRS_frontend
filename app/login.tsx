@@ -1,15 +1,7 @@
 import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import React, { useState } from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -48,6 +40,13 @@ export default function LoginScreen() {
 
       console.log("Login successful:", response.data);
 
+      if (email === "admin@gmail.com") {   // Simple check for admin user
+        router.replace("/admin");
+      }
+      else {
+        router.replace("/dashboard");
+      }
+
       setEmail("");
       setPassword("");
 
@@ -75,6 +74,7 @@ export default function LoginScreen() {
       setLoading(false);
     }
   };
+
 
   const isFormValid = email.trim() !== "" && password.trim() !== "" && !loading;
 

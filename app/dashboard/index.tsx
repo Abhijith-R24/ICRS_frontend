@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { Drawer } from "expo-router/drawer";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
@@ -68,18 +67,9 @@ export default function DashboardScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
-      <Drawer>
-        <Drawer.Screen name="Settings" options={{ title: "Settings" }} />
-      </Drawer>
-
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          style={styles.menuButton}
-          onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
-        >
-          <Ionicons name="menu" size={28} color="#000" />
-        </TouchableOpacity>
+        
         <Text style={styles.headerTitle}>CRIME CONNECT</Text>
         <View style={{ width: 28 }} />
       </View>
@@ -296,14 +286,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
-  },
-  menuButton: {
-    position: "absolute",
-    left: 15,
-    justifyContent: "center",  // CENTER ICON INSIDE BUTTON
-    alignItems: "center",
-    height: 40,               //  FIX HEIGHT
-    width: 40,
-    marginTop: 30,
-  },
+  }
 });
