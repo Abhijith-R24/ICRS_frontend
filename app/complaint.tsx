@@ -84,7 +84,7 @@ export default function ComplaintScreen() {
     setLoading(true);
     try {
       const response = await submitComplaint({
-        username: name,
+        reportedBy: name,
         phone: "+91" + phone,
         crimeType,
         description,
