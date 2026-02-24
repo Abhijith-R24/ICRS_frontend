@@ -4,6 +4,7 @@ import { router } from "expo-router";
 export default function Settings() {
   return (
     <View style={styles.container}>
+      <TouchableOpacity>
       <Text style={styles.title}>Settings</Text>
 
       <TouchableOpacity
@@ -18,6 +19,7 @@ export default function Settings() {
         onPress={() => router.push("/dashboard/settings/logout")}
       >
         <Text style={styles.text}>Logout</Text>
+      </TouchableOpacity>
       </TouchableOpacity>
     </View>
   );

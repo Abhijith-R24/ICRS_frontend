@@ -300,9 +300,9 @@ const styles = StyleSheet.create({
   menuButton: {
     position: "absolute",
     left: 15,
-    justifyContent: "center", // 👈 CENTER ICON INSIDE BUTTON
+    justifyContent: "center",  // CENTER ICON INSIDE BUTTON
     alignItems: "center",
-    height: 40, // 👈 FIX HEIGHT
+    height: 40,               //  FIX HEIGHT
     width: 40,
     marginTop: 30,
   },
