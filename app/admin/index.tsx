@@ -69,21 +69,21 @@ export default function AdminScreen() {
                 style={styles.pending}
                 onPress={() => updateStatus(item._id, "Pending")}
               >
-                <Text style={styles.btnText}>Pending</Text>
+                <Text style={styles.buttonText}>Pending</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.progress}
                 onPress={() => updateStatus(item._id, "Investigation")}
               >
-                <Text style={styles.btnText}>Investigating</Text>
+                <Text style={styles.buttonText}>Investigating</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.resolved}
                 onPress={() => updateStatus(item._id, "Resolved")}
               >
-                <Text style={styles.btnText}>Resolved</Text>
+                <Text style={styles.buttonText}>Resolved</Text>
               </TouchableOpacity>
             </View>
 
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  btnText: {
+  buttonText: {
     color: "#fff",
     fontSize: 12,
   },
