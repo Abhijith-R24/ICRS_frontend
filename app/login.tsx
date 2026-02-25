@@ -1,7 +1,15 @@
 import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
-import React, { useState } from "react";
-import { Alert, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import {
+  Alert,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -33,17 +41,20 @@ export default function LoginScreen() {
 
     setLoading(true);
     try {
-      const response = await loginUser({
-        email,
+      const loginData = {
+        email: email.trim(),
         password,
-      });
+      };
+
+      console.log("Login attempt with data:", loginData);
+      const response = await loginUser(loginData);
 
       console.log("Login successful:", response.data);
 
-      if (email === "admin@gmail.com") {   // Simple check for admin user
+      if (email === "admin@gmail.com") {
+        // Simple check for admin user
         router.replace("/admin");
-      }
-      else {
+      } else {
         router.replace("/dashboard");
       }
 
@@ -60,6 +71,8 @@ export default function LoginScreen() {
       }
     } catch (error: any) {
       console.error("Login error:", error);
+      console.error("Error status:", error.response?.status);
+      console.error("Error data:", error.response?.data);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
@@ -74,7 +87,6 @@ export default function LoginScreen() {
       setLoading(false);
     }
   };
-
 
   const isFormValid = email.trim() !== "" && password.trim() !== "" && !loading;
 
@@ -102,7 +114,7 @@ export default function LoginScreen() {
       />
 
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
         disabled={!isFormValid}
       >
@@ -155,4 +167,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
+  buttonDisabled: {},
 });

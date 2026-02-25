@@ -81,7 +81,7 @@ export default function RegisterScreen() {
       if (Platform.OS === "web") {
         // On web, use window.location for more reliable navigation
         console.log("Web registration successful, redirecting to login");
-        window.location.href = "/login";
+        router.replace("/login");
       } else {
         // On mobile, use Alert.alert with button callback
         Alert.alert("Success", "Registered successfully!", [
@@ -179,11 +179,13 @@ export default function RegisterScreen() {
         )}
       </View>
       <TouchableOpacity
-        style={styles.button}
+        style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
         disabled={!isFormValid}
       >
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>
+          {loading ? "Registering..." : "Register"}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
@@ -215,10 +217,11 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   button: {
-    backgroundColor: "#0f1627",
+    backgroundColor: "#000000",
     padding: 15,
     borderRadius: 8,
   },
+
   buttonText: {
     color: "#fff",
     textAlign: "center",
@@ -261,4 +264,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "left",
   },
+  buttonDisabled :{
+    
+  }
 });
