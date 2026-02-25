@@ -279,7 +279,7 @@ export default function ComplaintScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f4f6f9",
+    backgroundColor: "#ffffff",
   },
 
   scrollContainer: {
