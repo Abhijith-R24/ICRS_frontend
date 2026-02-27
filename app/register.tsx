@@ -1,15 +1,7 @@
 import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -23,11 +15,7 @@ export default function RegisterScreen() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
-      if (Platform.OS === "web") {
-        alert("Please enter a valid email address");
-      } else {
         Alert.alert("Error", "Please enter a valid email address");
-      }
       return;
     }
     if (
@@ -37,28 +25,18 @@ export default function RegisterScreen() {
       !confirmPassword.trim() ||
       !phone.trim()
     ) {
-      if (Platform.OS === "web") {
-        alert("Please fill all required fields");
-      } else {
         Alert.alert("Error", "Please fill all required fields");
-      }
       return;
     }
 
     if (password !== confirmPassword) {
-      if (Platform.OS === "web") {
-        alert("Passwords do not match");
-      } else {
+ 
         Alert.alert("Error", "Passwords do not match");
-      }
+      
       return;
     }
     if (phone.trim().length !== 10) {
-      if (Platform.OS === "web") {
-        alert("Invalid phone number");
-      } else {
         Alert.alert("Invalid phone number");
-      }
       return;
     }
 
@@ -69,6 +47,7 @@ export default function RegisterScreen() {
         email,
         password,
         phone: "+91" + phone,
+        role : "user",
       });
       console.log("Registration successful:", response.data);
 
@@ -78,11 +57,6 @@ export default function RegisterScreen() {
       setConfirmPassword("");
       setPhone("");
 
-      if (Platform.OS === "web") {
-        // On web, use window.location for more reliable navigation
-        console.log("Web registration successful, redirecting to login");
-        router.replace("/login");
-      } else {
         // On mobile, use Alert.alert with button callback
         Alert.alert("Success", "Registered successfully!", [
           {
@@ -90,21 +64,14 @@ export default function RegisterScreen() {
             onPress: () => router.replace("/login"),
           },
         ]);
-      }
     } catch (error: any) {
-      console.error("Registration error:", error);
-      console.error("Error response:", error.response);
+     
 
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-
-      if (Platform.OS === "web") {
-        alert(`Registration Failed: ${errorMessage}`);
-      } else {
         Alert.alert("Registration Failed", errorMessage);
-      }
     } finally {
       setLoading(false);
     }
