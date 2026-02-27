@@ -1,26 +1,27 @@
+import { submitComplaint } from "@/.vscode/services/complaint";
 import { Picker } from "@react-native-picker/picker";
-import React, { useState } from "react";
+import { ResizeMode, Video } from "expo-av";
+import * as DocumentPicker from "expo-document-picker";
+import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
+import { useState } from "react";
 import {
   Alert,
-  ScrollView,
   Image,
+  Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
-  Platform,
 } from "react-native";
-import { router } from "expo-router";
-import * as ImagePicker from "expo-image-picker";
-import * as DocumentPicker from "expo-document-picker";
-import { Video, ResizeMode } from "expo-av";
-import { submitComplaint } from "@/.vscode/services/complaint";
 
 export default function ComplaintScreen() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [location, setLocation] = useState("");
   const [crimeType, setCrimeType] = useState("");
   const [description, setDescription] = useState("");
@@ -62,7 +63,7 @@ export default function ComplaintScreen() {
 
   const handleSubmit = async () => {
     // Validate all fields
-    if (!name || !phone || !location || !description || !date) {
+    if (!name || !phone || !email || !location || !description || !date) {
       if (Platform.OS === "web") {
         alert("Please fill all required fields");
       } else {
@@ -86,6 +87,7 @@ export default function ComplaintScreen() {
       const response = await submitComplaint({
         reportedBy: name,
         phone: "+91" + phone,
+        email,
         crimeType,
         description,
         location,
@@ -102,6 +104,7 @@ export default function ComplaintScreen() {
       // Clear form
       setName("");
       setPhone("");
+      setEmail("");
       setLocation("");
       setDescription("");
       setDate(new Date().toISOString().split("T")[0]); // Reset to today
@@ -150,6 +153,14 @@ export default function ComplaintScreen() {
           placeholderTextColor="#999"
           value={name}
           onChangeText={setName}
+        />
+
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor="#999"
+          value={email}
+          onChangeText={setEmail}
         />
 
         <View style={styles.phoneRow}>
