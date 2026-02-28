@@ -47,9 +47,8 @@ export default function RegisterScreen() {
         email,
         password,
         phone: "+91" + phone,
-        role : "user",
       });
-      console.log("Registration successful:", response.data);
+      const role = response?.data?.user?.role || "user";
 
       setFullName("");
       setEmail("");
@@ -61,7 +60,13 @@ export default function RegisterScreen() {
         Alert.alert("Success", "Registered successfully!", [
           {
             text: "OK",
-            onPress: () => router.replace("/login"),
+            onPress: () => {
+              if(role === "admin"){
+                router.replace("/admin");
+              }else{
+                router.replace("/dashboard");
+              }
+            },
           },
         ]);
     } catch (error: any) {
@@ -232,6 +237,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled :{
+    opacity: 0.5,
+    cursor: "not-allowed" as any
     
   }
 });

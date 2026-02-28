@@ -1,112 +1,117 @@
-import React, { useEffect, useState } from "react";
-import {View,Text,FlatList,TouchableOpacity,StyleSheet,Alert,ActivityIndicator,
-} from "react-native";
-import axios from "axios";
-
+import { getAllComplaints, updateComplaintStatus } from "@/.vscode/services/admin";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import API from "@/.vscode/services/api";
 export default function AdminScreen() {
-  const [complaints, setComplaints] = useState([]);
+  const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const API = ""; //  change IP
 
-  useEffect(() => {
-    fetchComplaints();
-  }, []);
-
+  // Fetch complaints
   const fetchComplaints = async () => {
     try {
-      const res = await axios.get(`${API}/complaints`);
-      setComplaints(res.data);
-    } catch (error) {
-      console.log(error);
+      const response = await getAllComplaints();
+      console.log("URL:", API.defaults.baseURL + "/complaints")
+
+      console.log("Complaints:", response.data);
+
+      setComplaints(response.data);
+    } catch (error: any) {
+      console.log("Error FULL:", error);
+      console.log("ERROR DATA:", error?.response?.data);
+      console.log("ERROR STATUS:", error?.response?.status);
       Alert.alert("Error", "Failed to fetch complaints");
     } finally {
       setLoading(false);
     }
   };
 
-  const updateStatus = async (id: string, status: string) => {
+  useEffect(() => {
+    fetchComplaints();
+  }, []);
+
+  // Update status
+  const handleUpdateStatus = async (id: string, status: string) => {
     try {
-      await axios.put(`${API}/complaints/${id}`, { status });
-      fetchComplaints();
+      await updateComplaintStatus(id, status);
+
+      Alert.alert("Success", `Marked as ${status}`);
+
+      fetchComplaints(); // refresh
     } catch (error) {
-      Alert.alert("Error", "Status update failed");
+      console.log("Update error:", error);
+      Alert.alert("Error", "Failed to update status");
     }
   };
 
-  const deleteComplaint = async (id: string) => {
-    Alert.alert("Confirm", "Delete this complaint?", [
-      { text: "Cancel" },
-      {
-        text: "Delete",
-        onPress: async () => {
-          await axios.delete(`${API}/complaints/${id}`);
-          fetchComplaints();
-        },
-      },
-    ]);
-  };
+  // Render each complaint
+  const renderItem = ({ item }: any) => (
+    <View style={styles.card}>
+      <Text style={styles.label}>Name:</Text>
+      <Text style={styles.value}>{item.username}</Text>
 
+      <Text style={styles.label}>Crime:</Text>
+      <Text style={styles.value}>{item.crimeType}</Text>
+
+      <Text style={styles.label}>Location:</Text>
+      <Text style={styles.value}>{item.location}</Text>
+
+      <Text style={styles.label}>Status:</Text>
+      <Text style={styles.status}>{item.status}</Text>
+
+      <View style={styles.buttonRow}>
+        <TouchableOpacity
+          style={styles.approveBtn}
+          onPress={() => handleUpdateStatus(item._id, "approved")}
+        >
+          <Text style={styles.btnText}>Approve</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.rejectBtn}
+          onPress={() => handleUpdateStatus(item._id, "rejected")}
+        >
+          <Text style={styles.btnText}>Reject</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+
+  // Loading
   if (loading) {
-    return <ActivityIndicator size="large" style={{ marginTop: 50 }} />;
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" />
+        <Text>Loading complaints...</Text>
+      </View>
+    );
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin Panel</Text>
+      <Text style={styles.title}>Admin Dashboard</Text>
 
       <FlatList
         data={complaints}
-        keyExtractor={(item: any) => item._id}
-        renderItem={({ item }: any) => (
-          <View style={styles.card}>
-            <Text style={styles.bold}>{item.crimeType}</Text>
-            <Text>{item.description}</Text>
-            <Text>Status: {item.status}</Text>
-
-            <View style={styles.buttons}>
-              <TouchableOpacity
-                style={styles.pending}
-                onPress={() => updateStatus(item._id, "Pending")}
-              >
-                <Text style={styles.buttonText}>Pending</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.progress}
-                onPress={() => updateStatus(item._id, "Investigation")}
-              >
-                <Text style={styles.buttonText}>Investigating</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.resolved}
-                onPress={() => updateStatus(item._id, "Resolved")}
-              >
-                <Text style={styles.buttonText}>Resolved</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity
-              style={styles.delete}
-              onPress={() => deleteComplaint(item._id)}
-            >
-              <Text style={{ color: "#fff" }}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        keyExtractor={(item) => item._id}
+        renderItem={renderItem}
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
   );
 }
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: "#f4f6f9" },
+  container: {
+    flex: 1,
+    padding: 20,
+    backgroundColor: "#f4f6f9",
+  },
 
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 20,
     textAlign: "center",
+    marginBottom: 20,
   },
 
   card: {
@@ -117,42 +122,53 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
-  bold: { fontWeight: "bold", fontSize: 16 },
+  label: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 5,
+  },
 
-  buttons: {
+  value: {
+    fontSize: 15,
+    fontWeight: "bold",
+  },
+
+  status: {
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "blue",
+    marginTop: 5,
+  },
+
+  buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginTop: 10,
   },
 
-  pending: {
-    backgroundColor: "#facc15",
-    padding: 8,
-    borderRadius: 6,
-  },
-
-  progress: {
-    backgroundColor: "#3b82f6",
-    padding: 8,
-    borderRadius: 6,
-  },
-
-  resolved: {
-    backgroundColor: "#22c55e",
-    padding: 8,
-    borderRadius: 6,
-  },
-
-  delete: {
-    backgroundColor: "#ef4444",
+  approveBtn: {
+    backgroundColor: "green",
     padding: 10,
-    marginTop: 10,
-    borderRadius: 6,
-    alignItems: "center",
+    borderRadius: 8,
+    width: "48%",
   },
 
-  buttonText: {
+  rejectBtn: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 8,
+    width: "48%",
+  },
+
+  btnText: {
     color: "#fff",
-    fontSize: 12,
+    textAlign: "center",
+    fontWeight: "bold",
+  },
+
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

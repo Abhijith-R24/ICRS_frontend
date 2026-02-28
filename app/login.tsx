@@ -1,7 +1,7 @@
 import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View } from "react-native";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -13,32 +13,37 @@ export default function LoginScreen() {
 
     // Check if fields are empty
     if (!email.trim() || !password.trim()) {
-        Alert.alert("Error", "Please fill all required fields");
+      Alert.alert("Error", "Please fill all required fields");
       return;
     };
 
     // Validate email format
     if (!emailPattern.test(email)) {
-        Alert.alert("Error", "Please enter a valid email address");
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
     setLoading(true);
     try {
-      const response = await loginUser({ email: email.trim(), password,
+      const response = await loginUser({
+        email: email.trim(), password,
 
-       });
+      });
 
       console.log("Login success", response.data);
-      const role = response?.data?.user?.role || "user";
-      router.replace(role === "admin" ? "/admin" : "/dashboard");
-       
+      const isAdmin= response?.data?.isAdmin  ;
+      
       setEmail("");
       setPassword("");
+      if(isAdmin){
+        router.replace("/admin");
+      }else{
+        router.replace("/dashboard");
+      }
 
     } catch (error: any) {
-      const msg= error?.response?.data?.message || error.message ||
-      "Login failed. Please try again.";
+      const msg = error?.response?.data?.message || error.message ||
+        "Login failed. Please try again.";
 
       Alert.alert("Login Failed", msg);
     } finally {
@@ -84,6 +89,12 @@ export default function LoginScreen() {
       <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.link}>Don’t have an account? Register</Text>
       </TouchableOpacity>
+
+
+
+      <TouchableOpacity onPress={() => router.push("/admin")}>
+        <Text style={styles.link}>Admin</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -125,5 +136,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
   },
-  buttonDisabled: {},
+  buttonDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed" as any
+  },
 });
