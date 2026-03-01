@@ -48,26 +48,19 @@ export default function RegisterScreen() {
         password,
         phone: "+91" + phone,
       });
-      const role = response?.data?.user?.role || "user";
-
+      
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
-
-        // On mobile, use Alert.alert with button callback
+//alert box
         Alert.alert("Success", "Registered successfully!", [
           {
             text: "OK",
-            onPress: () => {
-              if(role === "admin"){
-                router.replace("/admin");
-              }else{
-                router.replace("/dashboard");
-              }
-            },
-          },
+            onPress: () => 
+                router.replace("/login"), //login page 
+              },
         ]);
     } catch (error: any) {
      
