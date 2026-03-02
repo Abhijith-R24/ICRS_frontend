@@ -1,17 +1,27 @@
-import { getAllComplaints, updateComplaintStatus } from "@/.vscode/services/admin";
-import { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  getAllComplaints,
+  updateComplaintStatus,
+} from "@/.vscode/services/admin";
 import API from "@/.vscode/services/api";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
 
   // Fetch complaints
   const fetchComplaints = async () => {
     try {
       const response = await getAllComplaints();
-      console.log("URL:", API.defaults.baseURL + "/complaints")
+      console.log("URL:", API.defaults.baseURL + "/complaints");
 
       console.log("Complaints:", response.data);
 
@@ -48,7 +58,7 @@ export default function AdminScreen() {
   const renderItem = ({ item }: any) => (
     <View style={styles.card}>
       <Text style={styles.label}>Name:</Text>
-      <Text style={styles.value}>{item.username}</Text>
+      <Text style={styles.value}>{item.reportedBy}</Text>
 
       <Text style={styles.label}>Crime:</Text>
       <Text style={styles.value}>{item.crimeType}</Text>
@@ -62,14 +72,14 @@ export default function AdminScreen() {
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.approveBtn}
-          onPress={() => handleUpdateStatus(item._id, "approved")}
+          onPress={() => handleUpdateStatus(item._id, "Approved")}
         >
           <Text style={styles.btnText}>Approve</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.rejectBtn}
-          onPress={() => handleUpdateStatus(item._id, "rejected")}
+          onPress={() => handleUpdateStatus(item._id, "Rejected")}
         >
           <Text style={styles.btnText}>Reject</Text>
         </TouchableOpacity>
