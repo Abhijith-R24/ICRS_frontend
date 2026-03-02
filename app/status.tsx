@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { getComplaints } from '@/.vscode/services/complaint'; // adjust path if needed
@@ -9,29 +9,43 @@ type Complaint = {
   location: string;
   status: string;
   date: string;
-  emergency?: boolean;
+  isEmergency?: boolean;
 };
 
 export default function StatusPage() {
   const [complaints, setComplaints] = useState<Complaint[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints
   const fetchComplaints = async () => {
     try {
       const response = await getComplaints();
-      setComplaints(response.data);
+      const data =Array.isArray(response.data)
+        ? response.data
+        : response.data.complaints || [];
+      console.log("Fetched complaints:", data);
+      const sorted =data.sort((a: Complaint , b: Complaint)=>
+        (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0)
+      );
+      setComplaints(sorted);
+      
     } catch (error: any) {
       console.log("Fetch error:", error);
       Alert.alert("Error", "Failed to load complaints");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchComplaints();
   }, []);
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchComplaints();
+  };
 
   //  Status color
   const getStatusColor = (status: string) => {
@@ -63,9 +77,15 @@ export default function StatusPage() {
       <FlatList
         data={complaints}
         keyExtractor={(item) => item._id}
+        refreshControl={
+          <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+        />
+        }
         ListEmptyComponent={<Text>No complaints found</Text>}
         renderItem={({ item }) => (
-          <View style={styles.card}>
+          <View style={[styles.card , item.isEmergency && styles.emergencyCard]}>
             <Text style={styles.label}>Complaint ID</Text>
             <Text style={styles.value}>{item._id}</Text>
 
@@ -81,7 +101,7 @@ export default function StatusPage() {
             </Text>
 
             {/* 🚨 Emergency Tag */}
-            {item.emergency && (
+            {item.isEmergency && (
               <Text style={styles.emergency}>🚨 Emergency</Text>
             )}
           </View>
@@ -161,4 +181,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  emergencyCard: {
+    borderLeftWidth: 5,
+    borderLeftColor: "red",
+    backgroundColor:"#fff3cd",
+  },
+
 });

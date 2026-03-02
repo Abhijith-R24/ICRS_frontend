@@ -23,7 +23,7 @@ export default function RegisterScreen() {
   const handleSubmit = async () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phonePattern = /^[6-9]\d{9}$/;
-    const panPattern=/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+    const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
 
     if (!emailPattern.test(email)) {
