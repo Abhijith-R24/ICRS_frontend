@@ -16,31 +16,56 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [pan,setPan] = useState
   const [loading, setLoading] = useState(false);
+  
 
   const handleSubmit = async () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const phonePattern = /^[6-9]\d{9}$/;
+    const panPattern=/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+
 
     if (!emailPattern.test(email)) {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
+    if (!phonePattern.test(phone)) {
+      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
+      return;
+    }
+    if (!panPattern.test(pan)) {
+      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
+      return;
+    }
+    
     if (
       !fullName.trim() ||
       !email.trim() ||
       !password.trim() ||
       !confirmPassword.trim() ||
-      !phone.trim()
+      !phone.trim() ||
+      !pan.trim()
     ) {
       Alert.alert("Error", "Please fill all required fields");
       return;
     }
-
+    if(!emailPattern.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+    if(!phonePattern.test(phone)) {
+      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
+      return;
+    }
+    if(!panPattern.test(pan)) {
+      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
+      return;
+    }
     if (password !== confirmPassword) {
       Alert.alert("Error", "Passwords do not match");
 
       return;
-    }
     if (phone.trim().length !== 10) {
       Alert.alert("Invalid phone number");
       return;
@@ -48,18 +73,21 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      const response = await registerUser({
-        username: fullName,
-        email,
-        password,
-        phone: "+91" + phone,
+        await registerUser({
+          username: fullName,
+          email,
+          password,
+          phone: "+91" + phone,
+          pan: pan
       });
       
-      setFullName("");
+      
+     setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
+      setPan("");
 
         // On mobile, use Alert.alert with button callback
         Alert.alert("Success", "Registered successfully!", [
@@ -88,6 +116,8 @@ export default function RegisterScreen() {
     phone.trim().length === 10 &&
     confirmPassword.trim() !== "" &&
     password === confirmPassword &&
+    /^[6-9]\d{9}$/.test(phone) &&
+    /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan) &&
     !loading;
   return (
     <View style={styles.container}>
@@ -126,6 +156,8 @@ export default function RegisterScreen() {
         value={confirmPassword}
         onChangeText={setConfirmPassword}
       />
+      {/*Phone Number */}
+    
 
       <View style={styles.phoneRow}>
         <Text style={styles.countryCode}>+91</Text>
@@ -142,6 +174,14 @@ export default function RegisterScreen() {
           }}
         />
       </View>
+      <TextInput
+      style={styles.input}
+      placeholder="PAN Card Number"
+      placeholderTextColor="#999"
+      autoCapitalize="characters"
+      value={pan}
+      onChangeText={(text)=>{setPan(text.toUpperCase())}}
+      />
       <View style={styles.errorContainer}>
         {phone.trim().length > 0 && phone.trim().length < 10 && (
           <Text style={styles.errorText}>
@@ -238,5 +278,9 @@ const styles = StyleSheet.create({
   buttonDisabled: {
    
   },
+<<<<<<< HEAD
 
 });
+=======
+});  
+>>>>>>> 6b04c70f629b20abd0cee6d7f4cc84d2ff992685
