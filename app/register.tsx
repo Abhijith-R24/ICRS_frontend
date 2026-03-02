@@ -16,7 +16,7 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
-  const [pan,setPan] = useState
+  const [pan,setPan] = useState("")
   const [loading, setLoading] = useState(false);
   
 
@@ -277,10 +277,7 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
    
-  },
-<<<<<<< HEAD
+  }
 
 });
-=======
-});  
->>>>>>> 6b04c70f629b20abd0cee6d7f4cc84d2ff992685
+}
