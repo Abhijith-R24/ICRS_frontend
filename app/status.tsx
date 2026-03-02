@@ -185,6 +185,5 @@ const styles = StyleSheet.create({
     borderLeftWidth: 5,
     borderLeftColor: "red",
     backgroundColor:"#fff3cd",
-  },
-
+  } 
 });

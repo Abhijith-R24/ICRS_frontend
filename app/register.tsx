@@ -275,7 +275,6 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled: {
-    opacity: 0.5,
-    cursor: "not-allowed" as any,
+    
   },
 });
