@@ -1,11 +1,20 @@
-import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { Link,router } from 'expo-router';
-import React, { useState } from "react";
+import { loginUser } from "@/.vscode/services/auth";
+import { router } from "expo-router";
+import { useState } from "react";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const handleSubmit = () => {
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async () => {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Check if fields are empty
@@ -21,83 +30,110 @@ export default function LoginScreen() {
     }
 
     // If everything is valid → Navigate
-    router.replace("/dashboard");
+    // router.replace("/dashboard");
+    try {
+      const response = await loginUser({
+        email: email.trim(),
+        password,
+      });
 
+      console.log("Login success", response.data);
+      const isAdmin = response?.data?.isAdmin;
+
+      setEmail("");
+      setPassword("");
+      if (isAdmin) {
+        router.replace("/admin");
+      } else {
+        router.replace("/dashboard");
+      }
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error.message ||
+        "Login failed. Please try again.";
+
+      Alert.alert("Login Failed", msg);
+    } finally {
+      setLoading(false);
+    }
 
     setEmail("");
     setPassword("");
-       
-
   };
-   const isFormValid = email.trim() !== "" && password.trim() !== "";
+  const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back!!</Text>
 
-      <TextInput style={styles.input} placeholder="Email" keyboardType="email-address"  autoCapitalize= "none" value={email} onChangeText={setEmail} />
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
 
-      <TextInput style={styles.input} placeholder="Password " secureTextEntry  value={password} onChangeText={setPassword} />
+      <TextInput
+        style={styles.input}
+        placeholder="Password "
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
 
-      <TouchableOpacity style={styles.button}onPress={handleSubmit}  disabled={!isFormValid}>
-
+      <TouchableOpacity
+        style={styles.button}
+        onPress={handleSubmit}
+        disabled={!isFormValid}
+      >
         <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-  
-    <TouchableOpacity onPress={()=> router.push("/register")}>
-        <Text style={styles.link}>
-        Don’t have an account? Register
-        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>
         <Text style={styles.link}>Don’t have an account? Register</Text>
       </TouchableOpacity>
-
-
-
-      
     </View>
   );
-
-
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 24,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   title: {
     fontSize: 28,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: 10,
-    color: '#000000',
-    fontFamily: 'roboto-700',
+    color: "#000000",
+    fontFamily: "roboto-700",
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    fontWeight:"bold",
+    borderColor: "#ddd",
+    fontWeight: "bold",
     padding: 12,
     borderRadius: 8,
     marginBottom: 15,
   },
   button: {
-    backgroundColor: '#000000',
+    backgroundColor: "#000000",
     padding: 15,
     borderRadius: 8,
   },
   buttonText: {
-    color: '#ffffff',
-    textAlign: 'center',
+    color: "#ffffff",
+    textAlign: "center",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   link: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
   },
 });
