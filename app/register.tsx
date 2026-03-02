@@ -1,7 +1,14 @@
 import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
+import {
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -15,7 +22,7 @@ export default function RegisterScreen() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailPattern.test(email)) {
-        Alert.alert("Error", "Please enter a valid email address");
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
     if (
@@ -25,18 +32,17 @@ export default function RegisterScreen() {
       !confirmPassword.trim() ||
       !phone.trim()
     ) {
-        Alert.alert("Error", "Please fill all required fields");
+      Alert.alert("Error", "Please fill all required fields");
       return;
     }
 
     if (password !== confirmPassword) {
- 
-        Alert.alert("Error", "Passwords do not match");
-      
+      Alert.alert("Error", "Passwords do not match");
+
       return;
     }
     if (phone.trim().length !== 10) {
-        Alert.alert("Invalid phone number");
+      Alert.alert("Invalid phone number");
       return;
     }
 
@@ -54,22 +60,22 @@ export default function RegisterScreen() {
       setPassword("");
       setConfirmPassword("");
       setPhone("");
-//alert box
+
+        // On mobile, use Alert.alert with button callback
         Alert.alert("Success", "Registered successfully!", [
           {
             text: "OK",
-            onPress: () => 
-                router.replace("/login"), //login page 
-              },
+            onPress: () => {
+              router.replace("/dashboard");
+            }
+          },
         ]);
     } catch (error: any) {
-     
-
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-        Alert.alert("Registration Failed", errorMessage);
+      Alert.alert("Registration Failed", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -229,9 +235,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "left",
   },
-  buttonDisabled :{
+  buttonDisabled: {
     opacity: 0.5,
-    cursor: "not-allowed" as any
-    
-  }
+    cursor: "not-allowed" as any,
+  },
 });
