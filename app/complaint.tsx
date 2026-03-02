@@ -1,4 +1,4 @@
-import { submitComplaint } from "@/.vscode/services/complaint";
+import { markEmergency, submitComplaint } from "@/.vscode/services/complaint";
 import { Picker } from "@react-native-picker/picker";
 import { ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
@@ -6,18 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 
-import {
-  Alert,
-  Image,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import {Alert,Image,Platform,Pressable,ScrollView,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
 
 export default function ComplaintScreen() {
   const [name, setName] = useState("");
@@ -73,6 +62,16 @@ export default function ComplaintScreen() {
       return;
     }
 
+    const handleEmergency = async (id:string) => {
+      try {
+         await markEmergency(id);
+        Alert.alert("Success", "Emergency marked");
+      } catch (error: any) {
+        console.log(error);
+        Alert.alert("Error", "Failed to mark emergency");
+      }
+    };
+
     // Validate phone length
     if (phone.length !== 10) {
       if (Platform.OS === "web") {
@@ -110,14 +109,7 @@ export default function ComplaintScreen() {
       setDescription("");
       setDate(new Date().toISOString().split("T")[0]); // Reset to today
       setImages([]);
-      setVideos([]);
-      setDocuments([]);
-
-      if (Platform.OS === "web") {
-        // On web, navigate using router.push then window.location as fallback
-        console.log("Web complaint submitted, redirecting to status");
-        router.replace("/status");
-      } else {
+      setVideos([]);      setDocuments([]);
         // On mobile, use Alert with callback
         Alert.alert("Success", "Complaint Registered Successfully", [
           {
@@ -125,19 +117,15 @@ export default function ComplaintScreen() {
             onPress: () => router.replace("/status"),
           },
         ]);
-      }
+      
     } catch (error: any) {
       console.error("Complaint submission error:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-
-      if (Platform.OS === "web") {
-        alert(`Error: ${errorMessage}`);
-      } else {
-        Alert.alert("Error", errorMessage);
-      }
+     Alert.alert("Error", errorMessage);
+      
     } finally {
       setLoading(false);
     }
@@ -283,6 +271,7 @@ export default function ComplaintScreen() {
             {loading ? "Submitting..." : "Submit Complaint"}
           </Text>
         </TouchableOpacity>
+        
       </ScrollView>
     </View>
   );
@@ -444,5 +433,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
     borderRadius: 8,
     backgroundColor: "#000",
+  },
+  emergencyBtn: {
+    backgroundColor: "red",
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  emergencyText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

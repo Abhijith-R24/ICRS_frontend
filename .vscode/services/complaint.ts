@@ -7,3 +7,6 @@ export const submitComplaint = (data: any) => {
 export const getComplaints = () => {
   return API.get("/api/complaints");
 };
+export const markEmergency = (id: string) => {
+  return API.post(`/api/complaints/${id}`);
+};
