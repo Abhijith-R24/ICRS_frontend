@@ -66,7 +66,7 @@ export default function RegisterScreen() {
           {
             text: "OK",
             onPress: () => {
-              router.replace("/dashboard");
+              router.replace("/login");
             }
           },
         ]);
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled: {
-    opacity: 0.5,
-    cursor: "not-allowed" as any,
+   
   },
+
 });

@@ -1,13 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  StatusBar,
-  ActivityIndicator,
-} from "react-native";
+import {View,Text,StyleSheet,TouchableOpacity,FlatList,StatusBar,ActivityIndicator}from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
@@ -49,6 +41,7 @@ export default function DashboardScreen() {
         const resolvedCount = complaintsData.filter(
           (c: any) => c.status === "Resolved" || c.status === "resolved",
         ).length;
+        setActiveCases(active);
         setResolved(resolvedCount);
       } catch (error) {
         console.error("Error fetching complaints:", error);
@@ -61,7 +54,7 @@ export default function DashboardScreen() {
     fetchComplaints();
   }, []);
 
-  const handleSubmit = () => {
+  const handleViewAll = () => {
     router.push("/status");
   };
   return (
@@ -135,16 +128,16 @@ export default function DashboardScreen() {
           }
           renderItem={({ item }) => (
             <View style={styles.reportCard}>
-              <Text style={styles.reportType}>{item.crimeType || "N/A"}</Text>
+              <Text style={styles.reportType}>{item.crimeType || "unknown"}</Text>
               <Text style={styles.reportStatus}>
                 {item.status || "Pending"}
               </Text>
-              <Text style={styles.reportSubtext}>{item.location}</Text>
+              <Text style={styles.reportSubtext}>{item.location || "Location not provided"}</Text>
             </View>
           )}
         />
       )}
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+      <TouchableOpacity style={styles.button} onPress={handleViewAll}>
         <Text style={styles.buttonText}>View All Complaints</Text>
       </TouchableOpacity>
     </View>

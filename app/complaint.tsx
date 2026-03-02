@@ -6,7 +6,8 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useState } from "react";
 
-import {Alert,Image,Platform,Pressable,ScrollView,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
+import { Alert, Image, Platform, Pressable, ScrollView, StyleSheet,
+   Text, TextInput,FlatList, TouchableOpacity, View } from "react-native";
 
 export default function ComplaintScreen() {
   const [name, setName] = useState("");
@@ -20,11 +21,15 @@ export default function ComplaintScreen() {
   const [videos, setVideos] = useState<string[]>([]);
   const [documents, setDocuments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+
+  const [isEmergency,setIsEmergency] = useState(false); //Emergency state
+ 
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
+   
 
     if (!result.canceled) {
       setImages((prev) => [...prev, result.assets[0].uri]);
@@ -53,32 +58,17 @@ export default function ComplaintScreen() {
 
   const handleSubmit = async () => {
     // Validate all fields
-    if (!name || !phone || !email || !location || !description || !date) {
-      if (Platform.OS === "web") {
-        alert("Please fill all required fields");
-      } else {
+    if (!name || !phone || !email || !location || !description || !date || !crimeType) {
         Alert.alert("Error", "Please fill all required fields");
-      }
       return;
     }
 
-    const handleEmergency = async (id:string) => {
-      try {
-         await markEmergency(id);
-        Alert.alert("Success", "Emergency marked");
-      } catch (error: any) {
-        console.log(error);
-        Alert.alert("Error", "Failed to mark emergency");
-      }
-    };
+   
 
     // Validate phone length
     if (phone.length !== 10) {
-      if (Platform.OS === "web") {
-        alert("Phone number must be 10 digits");
-      } else {
+    
         Alert.alert("Error", "Phone number must be 10 digits");
-      }
       return;
     }
 
@@ -92,6 +82,7 @@ export default function ComplaintScreen() {
         description,
         location,
         date,
+        isEmergency,
         evidence: {
           images,
           videos,
@@ -109,23 +100,23 @@ export default function ComplaintScreen() {
       setDescription("");
       setDate(new Date().toISOString().split("T")[0]); // Reset to today
       setImages([]);
-      setVideos([]);      setDocuments([]);
-        // On mobile, use Alert with callback
-        Alert.alert("Success", "Complaint Registered Successfully", [
-          {
-            text: "OK",
-            onPress: () => router.replace("/status"),
-          },
-        ]);
-      
+      setVideos([]); setDocuments([]);
+      // On mobile, use Alert with callback
+      Alert.alert("Success", "Complaint Registered Successfully", [
+        {
+          text: "OK",
+          onPress: () => router.replace("/status"),
+        },
+      ]);
+
     } catch (error: any) {
       console.error("Complaint submission error:", error);
       const errorMessage =
         error.response?.data?.message ||
         error.message ||
         "Something went wrong";
-     Alert.alert("Error", errorMessage);
-      
+      Alert.alert("Error", errorMessage);
+
     } finally {
       setLoading(false);
     }
@@ -163,7 +154,8 @@ export default function ComplaintScreen() {
             maxLength={10}
             value={phone}
             onChangeText={(text) => {
-              const numericText = text.replace(/[^0-9]/g, "").slice(0, 10); // Remove non-numeric characters and limit to 10 digits
+              const numericText = text.replace(/[^0-9]/g, "").slice(0, 10); 
+              // Remove non-numeric characters and limit to 10 digits
               setPhone(numericText);
             }}
           />
@@ -216,6 +208,14 @@ export default function ComplaintScreen() {
           maxLength={500}
         />
         <Text style={styles.charCount}>{description.length}/500</Text>
+        {/*Emergency button*/}
+        <TouchableOpacity
+        style={[styles.emergencyBtn,isEmergency && styles.emergencyActive,]} 
+        onPress={() => setIsEmergency (!isEmergency)}>
+          <Text style ={styles.emergencyText}>
+            {isEmergency ? "Emergency Enabled 🚨" : "Mark as Emergency"}
+          </Text>
+        </TouchableOpacity>
         <View style={styles.evidenceCard}>
           <Text style={styles.sectionTitle}>Upload evidence</Text>
           <Text style={styles.sectionSubtitle}>
@@ -271,7 +271,6 @@ export default function ComplaintScreen() {
             {loading ? "Submitting..." : "Submit Complaint"}
           </Text>
         </TouchableOpacity>
-        
       </ScrollView>
     </View>
   );
@@ -439,10 +438,14 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 1,
+    marginBottom: 10,
   },
   emergencyText: {
     color: "#fff",
     fontWeight: "bold",
   },
+  emergencyActive: {
+    backgroundColor: "red",
+  }
 });
