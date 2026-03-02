@@ -92,9 +92,7 @@ export default function LoginScreen() {
 
 
 
-      <TouchableOpacity onPress={() => router.push("/admin")}>
-        <Text style={styles.link}>Admin</Text>
-      </TouchableOpacity>
+      
     </View>
   );
 }

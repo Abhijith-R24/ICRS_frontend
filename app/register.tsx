@@ -54,23 +54,22 @@ export default function RegisterScreen() {
         password,
         phone: "+91" + phone,
       });
-      const role = response?.data?.user?.role || "user";
-
+      
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
 
-      // On mobile, use Alert.alert with button callback
-      Alert.alert("Success", "Registered successfully!", [
-        {
-          text: "OK",
-          onPress: () => {
-            router.replace("/dashboard");
+        // On mobile, use Alert.alert with button callback
+        Alert.alert("Success", "Registered successfully!", [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/dashboard");
+            }
           },
-        },
-      ]);
+        ]);
     } catch (error: any) {
       const errorMessage =
         error.response?.data?.message ||
