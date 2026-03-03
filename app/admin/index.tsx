@@ -1,17 +1,9 @@
 import {
   getAllComplaints,
   updateComplaintStatus,
-} from "@/.vscode/services/admin";
-import API from "@/.vscode/services/api";
+} from "@/.vscode/services/admin"
 import { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+import {ActivityIndicator,Alert,FlatList,StyleSheet,Text,TouchableOpacity,View,
 } from "react-native";
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -20,12 +12,15 @@ export default function AdminScreen() {
   // Fetch complaints
   const fetchComplaints = async () => {
     try {
+      setLoading(true);
       const response = await getAllComplaints();
-      console.log("URL:", API.defaults.baseURL + "/complaints");
+      const data =Array.isArray(response.data)
+      ?response.data
+      :response.data.complaints || [];
+      const sorted = data.sort(
+        (a:any,b:any)=> (b.isEmergency  ? 1:0)-(a.isEmergency ? 1:0));
 
-      console.log("Complaints:", response.data);
-
-      setComplaints(response.data);
+      setComplaints(sorted);
     } catch (error: any) {
       console.log("Error FULL:", error);
       console.log("ERROR DATA:", error?.response?.data);
@@ -56,7 +51,8 @@ export default function AdminScreen() {
 
   // Render each complaint
   const renderItem = ({ item }: any) => (
-    <View style={styles.card}>
+    <View style={[styles.card ,
+       item.isEmergency && styles.emergencyCard]}>
       <Text style={styles.label}>Name:</Text>
       <Text style={styles.value}>{item.reportedBy}</Text>
 
@@ -68,6 +64,9 @@ export default function AdminScreen() {
 
       <Text style={styles.label}>Status:</Text>
       <Text style={styles.status}>{item.status}</Text>
+      {item.isEmergency && (
+        <Text style={styles.emergencyBadge}>🚨 EMERGENCY</Text>
+      )}
 
       <View style={styles.buttonRow}>
         <TouchableOpacity
@@ -180,5 +179,17 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  emergencyCard: {
+    borderLeftWidth: 2,
+    borderLeftColor: "red",
+    backgroundColor: "#fff5f5",
+  },
+
+  emergencyBadge: {
+    color: "red",
+    fontWeight: "bold",
+    marginTop: 8,
+    fontSize: 14,
   },
 });
