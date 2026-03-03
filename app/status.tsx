@@ -1,8 +1,8 @@
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert, RefreshControl } from 'react-native';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { getComplaints } from '@/.vscode/services/complaint'; // adjust path if needed
-
+import { getMyComplaints } from '@/.vscode/services/complaint'; // adjust path if needed
+import AsyncStorage from '@react-native-async-storage/async-storage';
 type Complaint = {
   _id: string;
   crimeType: string;
@@ -20,7 +20,14 @@ export default function StatusPage() {
   // Fetch complaints
   const fetchComplaints = async () => {
     try {
-      const response = await getComplaints();
+      setLoading(true);
+      const userData= await AsyncStorage.getItem("user");
+      if(!userData){
+        Alert.alert("Error", "User not found");
+        return;
+      }
+      const parsedUser=JSON.parse(userData);
+      const response = await getMyComplaints(parsedUser._id);
       const data =Array.isArray(response.data)
         ? response.data
         : response.data.complaints || [];

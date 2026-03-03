@@ -4,10 +4,11 @@ import { ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Alert, Image, Platform, Pressable, ScrollView, StyleSheet,
    Text, TextInput,FlatList, TouchableOpacity, View } from "react-native";
+   import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ComplaintScreen() {
   const [name, setName] = useState("");
@@ -23,7 +24,17 @@ export default function ComplaintScreen() {
   const [loading, setLoading] = useState(false);
 
   const [isEmergency,setIsEmergency] = useState(false); //Emergency state
- 
+ const [userId,setUserId]=useState<String | null>(null);
+  useEffect(() => {
+    const loadUser = async () => {
+      const storedUser = await AsyncStorage.getItem("user");
+      if (storedUser) {
+        const parsed=JSON.parse(storedUser);
+        setUserId(parsed._id);
+      }
+    };
+    loadUser();
+  }, []);
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -75,6 +86,7 @@ export default function ComplaintScreen() {
     setLoading(true);
     try {
       const response = await submitComplaint({
+        userId,
         reportedBy: name,
         phone: "+91" + phone,
         email,

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -32,13 +33,15 @@ export default function LoginScreen() {
     // If everything is valid → Navigate
     // router.replace("/dashboard");
     try {
+      setLoading(true);
       const response = await loginUser({
         email: email.trim(),
         password,
       });
+      await AsyncStorage.setItem("user",JSON.stringify(response.data));
 
       console.log("Login success", response.data);
-      const isAdmin = response?.data?.isAdmin;
+      const isAdmin = response?.data?.isAdmin 
 
       setEmail("");
       setPassword("");
@@ -57,10 +60,11 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
+  }
 
     setEmail("");
     setPassword("");
-  };
+
   const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   return (
@@ -97,8 +101,7 @@ export default function LoginScreen() {
       </TouchableOpacity>
     </View>
   );
-}
-
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -138,3 +141,4 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
+

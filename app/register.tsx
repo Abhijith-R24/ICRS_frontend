@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -92,7 +93,7 @@ export default function RegisterScreen() {
         {
           text: "OK",
           onPress: () => {
-            router.replace("/dashboard");
+            router.replace("/login");
           },
         },
       ]);
