@@ -60,11 +60,8 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
-  }
-
-    setEmail("");
-    setPassword("");
-
+ 
+  } 
   const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   return (
@@ -88,12 +85,18 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={!isFormValid}
+      <TouchableOpacity style={[
+        styles.button,
+        (!isFormValid || loading) && { opacity : 0.6},
+      ]}
+      onPress={handleSubmit}
+      disabled={!isFormValid || loading}
       >
-        <Text style={styles.buttonText}>Login</Text>
+        {loading ? (
+        <Text style={styles.buttonText}>Loginging in..</Text>
+        ) : (
+          <Text style={styles.buttonText}>Login</Text>
+        )}
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>

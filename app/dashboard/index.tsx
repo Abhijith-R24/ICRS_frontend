@@ -6,6 +6,7 @@ import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { getComplaints } from "@/.vscode/services/complaint";
+import {RefreshControl} from "react-native-gesture-handler";
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
@@ -14,9 +15,9 @@ export default function DashboardScreen() {
   const [totalReports, setTotalReports] = useState(0);
   const [activeCases, setActiveCases] = useState(0);
   const [resolved, setResolved] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints from API
-  useEffect(() => {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
@@ -48,11 +49,16 @@ export default function DashboardScreen() {
         setComplaints([]);
       } finally {
         setLoading(false);
+        setRefreshing(false);
       }
     };
-
+  useEffect(() => {
     fetchComplaints();
   }, []);
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchComplaints();
+  };
 
   const handleViewAll = () => {
     router.push("/status");
@@ -135,6 +141,9 @@ export default function DashboardScreen() {
               <Text style={styles.reportSubtext}>{item.location || "Location not provided"}</Text>
             </View>
           )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       )}
       <TouchableOpacity style={styles.button} onPress={handleViewAll}>

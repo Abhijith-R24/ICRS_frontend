@@ -5,9 +5,11 @@ import {
 import { useEffect, useState } from "react";
 import {ActivityIndicator,Alert,FlatList,StyleSheet,Text,TouchableOpacity,View,
 } from "react-native";
+import {RefreshControl} from "react-native-gesture-handler";
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints
   const fetchComplaints = async () => {
@@ -28,12 +30,17 @@ export default function AdminScreen() {
       Alert.alert("Error", "Failed to fetch complaints");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
   useEffect(() => {
     fetchComplaints();
   }, []);
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchComplaints();
+  };
 
   // Update status
   const handleUpdateStatus = async (id: string, status: string) => {
@@ -104,6 +111,9 @@ export default function AdminScreen() {
         data={complaints}
         keyExtractor={(item) => item._id}
         renderItem={renderItem}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
         contentContainerStyle={{ paddingBottom: 20 }}
       />
     </View>
