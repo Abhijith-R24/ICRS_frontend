@@ -13,6 +13,6 @@ export const updateComplaintStatus = async (id: string, status: string) => {
 };
 
 // // Get only emergency complaints
-// export const getEmergencyComplaints = async () => {
-//   return API.get("/api/complaints/emergency");
-// };
+ export const getEmergencyComplaints = async () => {
+ return API.get("/api/complaints/emergency");
+ };
