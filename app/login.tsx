@@ -1,13 +1,7 @@
 import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -87,7 +81,7 @@ export default function LoginScreen() {
 
       <TouchableOpacity style={[
         styles.button,
-        (!isFormValid || loading) && { opacity : 0.6},
+        (!isFormValid || loading) && { opacity : 100},
       ]}
       onPress={handleSubmit}
       disabled={!isFormValid || loading}

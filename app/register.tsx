@@ -1,13 +1,7 @@
 import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
 } from "react-native";
 
 export default function RegisterScreen() {
@@ -36,7 +30,12 @@ export default function RegisterScreen() {
       Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
       return;
     }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
 
+      return;
+    }
+setLoading(true);
     if (
       !fullName.trim() ||
       !email.trim() ||
@@ -48,23 +47,8 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Please fill all required fields");
       return;
     }
-    if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-    if (!phonePattern.test(phone)) {
-      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
-      return;
-    }
-    if (!panPattern.test(pan)) {
-      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-
-      return;
-    }
+    
+    
     if (phone.trim().length !== 10) {
       Alert.alert("Invalid phone number");
       return;
@@ -72,13 +56,14 @@ export default function RegisterScreen() {
 
     setLoading(true);
     try {
-      await registerUser({
+      const response = await registerUser({
         username: fullName,
         email,
         password,
         phone: "+91" + phone,
         pan: pan,
       });
+      console.log("Registration successful",response);
 
       setFullName("");
       setEmail("");
@@ -275,6 +260,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled: {
+    opacity: 100,
 
   },
-});
+})
+;

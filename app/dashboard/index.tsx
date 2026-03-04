@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import {View,Text,StyleSheet,TouchableOpacity,FlatList,StatusBar,ActivityIndicator}from "react-native";
+import {View,Text,StyleSheet,TouchableOpacity,FlatList,StatusBar,ActivityIndicator,Alert}from "react-native";
 import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
-import { getComplaints } from "@/.vscode/services/complaint";
+import { getMyComplaints } from "@/.vscode/services/complaint";
 import {RefreshControl} from "react-native-gesture-handler";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
@@ -21,8 +22,16 @@ export default function DashboardScreen() {
     const fetchComplaints = async () => {
       try {
         setLoading(true);
-        const response = await getComplaints();
+        const userData= await AsyncStorage.getItem("user");
+        if(!userData){
+          Alert.alert("Error", "User not found");
+          return;
+        }
+        const parsedUser = JSON.parse(userData);
+        const userId = parsedUser.userId || parsedUser._id || parsedUser.user._id;
+        const response = await getMyComplaints(userId);
         console.log("Fetched complaints:", response.data);
+         
 
         const complaintsData = Array.isArray(response.data)
           ? response.data
@@ -130,7 +139,7 @@ export default function DashboardScreen() {
         <FlatList
           data={complaints.slice(0, 5)} // Show last 5
           keyExtractor={(item) =>
-            item._id || item.id || Math.random().toString()
+            item._id || item.id || item._id.toString()
           }
           renderItem={({ item }) => (
             <View style={styles.reportCard}>

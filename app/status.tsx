@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator, Alert, RefreshControl } from 'react-native';
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { getMyComplaints } from '@/.vscode/services/complaint'; // adjust path if needed
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 type Complaint = {
   _id: string;
   crimeType: string;
@@ -18,25 +18,32 @@ export default function StatusPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints
-  const fetchComplaints = async () => {
+  const fetchComplaints = useCallback(async () => {
     try {
       setLoading(true);
-      const userData= await AsyncStorage.getItem("user");
-      if(!userData){
+      const userData = await AsyncStorage.getItem("user");
+
+      if (!userData) {
         Alert.alert("Error", "User not found");
         return;
       }
-      const parsedUser=JSON.parse(userData);
-      const response = await getMyComplaints(parsedUser._id);
-      const data =Array.isArray(response.data)
-        ? response.data
-        : response.data.complaints || [];
-      console.log("Fetched complaints:", data);
-      const sorted =data.sort((a: Complaint , b: Complaint)=>
+      const parsedUser = JSON.parse(userData);
+
+      const userId =
+        parsedUser.userId ||
+        parsedUser._id ||
+        parsedUser.user?._id;
+
+      console.log("User ID:", userId);
+
+      const response = await getMyComplaints(userId);
+
+      console.log("Fetched complaints:", response.data);
+      const sorted = [...response.data].sort((a: Complaint, b: Complaint) =>
         (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0)
       );
       setComplaints(sorted);
-      
+
     } catch (error: any) {
       console.log("Fetch error:", error);
       Alert.alert("Error", "Failed to load complaints");
@@ -44,11 +51,11 @@ export default function StatusPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    fetchComplaints();
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    fetchComplaints();
+  }, [fetchComplaints]));
   const onRefresh = () => {
     setRefreshing(true);
     fetchComplaints();
@@ -83,16 +90,16 @@ export default function StatusPage() {
 
       <FlatList
         data={complaints}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item._id.toString()}
         refreshControl={
           <RefreshControl
-          refreshing={refreshing}
-          onRefresh={onRefresh}
-        />
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+          />
         }
         ListEmptyComponent={<Text>No complaints found</Text>}
         renderItem={({ item }) => (
-          <View style={[styles.card , item.isEmergency && styles.emergencyCard]}>
+          <View style={[styles.card, item.isEmergency && styles.emergencyCard]}>
             <Text style={styles.label}>Complaint ID</Text>
             <Text style={styles.value}>{item._id}</Text>
 
@@ -191,6 +198,6 @@ const styles = StyleSheet.create({
   emergencyCard: {
     borderLeftWidth: 5,
     borderLeftColor: "red",
-    backgroundColor:"#fff3cd",
-  } 
+    backgroundColor: "#fff3cd",
+  }
 });

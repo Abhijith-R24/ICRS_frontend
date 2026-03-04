@@ -17,24 +17,14 @@ export default function ComplaintScreen() {
   const [location, setLocation] = useState("");
   const [crimeType, setCrimeType] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(""); // YYYY-MM-DD format
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]); // YYYY-MM-DD format
   const [images, setImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [documents, setDocuments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [isEmergency,setIsEmergency] = useState(false); //Emergency state
- const [userId,setUserId]=useState<String | null>(null);
-  useEffect(() => {
-    const loadUser = async () => {
-      const storedUser = await AsyncStorage.getItem("user");
-      if (storedUser) {
-        const parsed=JSON.parse(storedUser);
-        setUserId(parsed._id);
-      }
-    };
-    loadUser();
-  }, []);
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -85,8 +75,10 @@ export default function ComplaintScreen() {
 
     setLoading(true);
     try {
-      const response = await submitComplaint({
-        userId,
+      const userData = await AsyncStorage.getItem("user");
+      const parsedUser = JSON.parse(userData || "{}");
+     const response = await submitComplaint({
+        userId:parsedUser.userId,
         reportedBy: name,
         phone: "+91" + phone,
         email,
