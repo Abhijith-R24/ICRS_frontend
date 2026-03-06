@@ -3,7 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,ActivityIndicator
 } from "react-native";
-import { ActivityIndicator } from "react-native";
+
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -48,72 +48,50 @@ export default function RegisterScreen() {
       return;
     }
 setLoading(true);
-    if (
-      !fullName.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim() ||
-      !phone.trim() ||
-      !pan.trim()
-    ) {
-      Alert.alert("Error", "Please fill all required fields");
-      return;
-    }
-    
-    
-    if (phone.trim().length !== 10) {
-      Alert.alert("Invalid phone number");
-      return;
-    }
-
-    setLoading(true);
-    console.log("Submitting registration")
-    try {
-      const response = await registerUser({
-        username: fullName,
-        email,
-        password,
-        phone: "+91" + phone,
-        pan: pan,
-      });
-      console.log("Registration successful",response);
-
-      setFullName("");
-      setEmail("");
-      setPassword("");
-      setConfirmPassword("");
-      setPhone("");
-      setPan("");
-
-      // On mobile, use Alert.alert with button callback
-      Alert.alert("Success", "Registered successfully!", [
-        {
-          text: "OK",
-          onPress: () => router.replace("/login"),
-        },
-      ]);
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
-        "Something went wrong";
-      Alert.alert("Registration Failed", errorMessage);
-    } finally {
-      setLoading(false);
-    }
+console.log("Submitting registration");
+try{
+  const response = await registerUser({
+    username: fullName,
+    email,
+    password,
+    phone: "+91" + phone,
+    pan: pan,
+  });
+  console.log("Registration successful", response);
+setFullName("");
+setEmail("");
+setPassword("");
+setConfirmPassword("");
+setPhone("");
+setPan("");
+Alert.alert("Success", "Registered successfully!", [
+  {
+    text: "OK",
+    onPress: () => router.replace("/login"),
+  },
+]);
+}catch(error) {
+  const errorMessage =
+    error?.response?.data?.message ||
+    error?.message ||
+    "Something went wrong";
+  Alert.alert("Registration Failed", errorMessage);
+} finally { 
+   setLoading(false);
+}
   };
   const isFormValid =
     fullName.trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
-    phone.trim() !== "" &&
-    phone.trim().length === 10 &&
     confirmPassword.trim() !== "" &&
+    phone.trim() !== "" &&
+    pan.trim() !== "" &&
     password === confirmPassword &&
     /^[6-9]\d{9}$/.test(phone) &&
     /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan) &&
     !loading;
-  return (
+    return (
     <View style={styles.container}>
       <Text style={styles.title}>Create Account</Text>
 
