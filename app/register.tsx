@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
 } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -18,24 +19,6 @@ export default function RegisterScreen() {
     const phonePattern = /^[6-9]\d{9}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
-    if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-    if (!phonePattern.test(phone)) {
-      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
-      return;
-    }
-    if (!panPattern.test(pan)) {
-      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
-      return;
-    }
-    if (password !== confirmPassword) {
-      Alert.alert("Error", "Passwords do not match");
-
-      return;
-    }
-setLoading(true);
     if (
       !fullName.trim() ||
       !email.trim() ||
@@ -47,14 +30,26 @@ setLoading(true);
       Alert.alert("Error", "Please fill all required fields");
       return;
     }
-    
-    
-    if (phone.trim().length !== 10) {
-      Alert.alert("Invalid phone number");
+    if (!emailPattern.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
+    if (!phonePattern.test(phone) || phone.trim().length !== 10) {
+      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
+      return;
+    }
+    if (!panPattern.test(pan)) {
+      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+
+      return;
+      }
 
     setLoading(true);
+    console.log("Submitting registration")
     try {
       const response = await registerUser({
         username: fullName,
@@ -76,9 +71,7 @@ setLoading(true);
       Alert.alert("Success", "Registered successfully!", [
         {
           text: "OK",
-          onPress: () => {
-            router.replace("/login");
-          },
+          onPress: () => router.replace("/login"),
         },
       ]);
     } catch (error: any) {
@@ -176,11 +169,13 @@ setLoading(true);
       <TouchableOpacity
         style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
-        disabled={!isFormValid}
+          disabled={!isFormValid || loading}
       >
-        <Text style={styles.buttonText}>
-          {loading ? "Registering..." : "Register"}
-        </Text>
+        {loading ? (
+                <ActivityIndicator color="#fff" />
+                ) : (
+        <Text style={styles.buttonText}>Register</Text>
+                )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>

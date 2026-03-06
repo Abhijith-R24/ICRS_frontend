@@ -1,8 +1,7 @@
 import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
-} from "react-native";
+import {ActivityIndicator, Alert,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
@@ -87,7 +86,7 @@ export default function LoginScreen() {
       disabled={!isFormValid || loading}
       >
         {loading ? (
-        <Text style={styles.buttonText}>Loginging in..</Text>
+        <ActivityIndicator color="#fff" />
         ) : (
           <Text style={styles.buttonText}>Login</Text>
         )}
