@@ -1,7 +1,7 @@
-import { registerUser } from "@/services/auth";
+import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,ActivityIndicator
+import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
 } from "react-native";
 import { ActivityIndicator } from "react-native";
 
@@ -46,25 +46,7 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Passwords do not match");
 
       return;
-    }
-setLoading(true);
-    if (
-      !fullName.trim() ||
-      !email.trim() ||
-      !password.trim() ||
-      !confirmPassword.trim() ||
-      !phone.trim() ||
-      !pan.trim()
-    ) {
-      Alert.alert("Error", "Please fill all required fields");
-      return;
-    }
-    
-    
-    if (phone.trim().length !== 10) {
-      Alert.alert("Invalid phone number");
-      return;
-    }
+      }
 
     setLoading(true);
     console.log("Submitting registration")
