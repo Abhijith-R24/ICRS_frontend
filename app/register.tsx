@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,ActivityIndicator
 } from "react-native";
+import { ActivityIndicator } from "react-native";
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -18,11 +19,22 @@ export default function RegisterScreen() {
     const phonePattern = /^[6-9]\d{9}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
 
+    if (
+      !fullName.trim() ||
+      !email.trim() ||
+      !password.trim() ||
+      !confirmPassword.trim() ||
+      !phone.trim() ||
+      !pan.trim()
+    ) {
+      Alert.alert("Error", "Please fill all required fields");
+      return;
+    }
     if (!emailPattern.test(email)) {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
-    if (!phonePattern.test(phone)) {
+    if (!phonePattern.test(phone) || phone.trim().length !== 10) {
       Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
       return;
     }
@@ -36,7 +48,6 @@ export default function RegisterScreen() {
       return;
     }
 setLoading(true);
-console.log("Submiting registration");
     if (
       !fullName.trim() ||
       !email.trim() ||
@@ -56,6 +67,7 @@ console.log("Submiting registration");
     }
 
     setLoading(true);
+    console.log("Submitting registration")
     try {
       const response = await registerUser({
         username: fullName,
@@ -77,9 +89,7 @@ console.log("Submiting registration");
       Alert.alert("Success", "Registered successfully!", [
         {
           text: "OK",
-          onPress: () => {
-            router.replace("/login");
-          },
+          onPress: () => router.replace("/login"),
         },
       ]);
     } catch (error: any) {
@@ -177,11 +187,13 @@ console.log("Submiting registration");
       <TouchableOpacity
         style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
-        disabled={!isFormValid}
+          disabled={!isFormValid || loading}
       >
-        <Text style={styles.buttonText}>
-          {loading ? "Registering..." : "Register"}
-        </Text>
+        {loading ? (
+                <ActivityIndicator color="#fff" />
+                ) : (
+        <Text style={styles.buttonText}>Register</Text>
+                )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
