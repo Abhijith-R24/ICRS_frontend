@@ -1,7 +1,7 @@
-import { registerUser } from "@/.vscode/services/auth";
+import { registerUser } from "@/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
+import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,ActivityIndicator
 } from "react-native";
 
 export default function RegisterScreen() {
@@ -36,6 +36,7 @@ export default function RegisterScreen() {
       return;
     }
 setLoading(true);
+console.log("Submiting registration");
     if (
       !fullName.trim() ||
       !email.trim() ||
