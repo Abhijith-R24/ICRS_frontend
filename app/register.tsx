@@ -1,9 +1,11 @@
 import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
-import {Alert,StyleSheet,Text,TextInput,TouchableOpacity,View,
+import {
+  ActivityIndicator,
+  Alert, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from "react-native";
-import { ActivityIndicator } from "react-native";
+
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -46,10 +48,9 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Passwords do not match");
 
       return;
-      }
-
+    }
     setLoading(true);
-    console.log("Submitting registration")
+    console.log("Submitting registration");
     try {
       const response = await registerUser({
         username: fullName,
@@ -58,16 +59,13 @@ export default function RegisterScreen() {
         phone: "+91" + phone,
         pan: pan,
       });
-      console.log("Registration successful",response);
-
+      console.log("Registration successful", response);
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
       setPan("");
-
-      // On mobile, use Alert.alert with button callback
       Alert.alert("Success", "Registered successfully!", [
         {
           text: "OK",
@@ -76,8 +74,8 @@ export default function RegisterScreen() {
       ]);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
+        error?.response?.data?.message ||
+        error?.message ||
         "Something went wrong";
       Alert.alert("Registration Failed", errorMessage);
     } finally {
@@ -88,9 +86,9 @@ export default function RegisterScreen() {
     fullName.trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
-    phone.trim() !== "" &&
-    phone.trim().length === 10 &&
     confirmPassword.trim() !== "" &&
+    phone.trim() !== "" &&
+    pan.trim() !== "" &&
     password === confirmPassword &&
     /^[6-9]\d{9}$/.test(phone) &&
     /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan) &&
@@ -169,13 +167,13 @@ export default function RegisterScreen() {
       <TouchableOpacity
         style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
-          disabled={!isFormValid || loading}
+        disabled={!isFormValid || loading}
       >
         {loading ? (
-                <ActivityIndicator color="#fff" />
-                ) : (
-        <Text style={styles.buttonText}>Register</Text>
-                )}
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Register</Text>
+        )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
@@ -259,4 +257,4 @@ const styles = StyleSheet.create({
 
   },
 })
-;
+  ;
