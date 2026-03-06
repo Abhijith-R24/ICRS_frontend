@@ -80,6 +80,9 @@ export default function DashboardScreen() {
         
         <Text style={styles.headerTitle}>CRIME CONNECT</Text>
         <View style={{ width: 28 }} />
+        <TouchableOpacity onPress={() => router.push("/dashboard/settings")}>
+          <Ionicons name="settings-outline" size={26} color="#000" />
+        </TouchableOpacity>
       </View>
 
       {/* Quick Actions */}

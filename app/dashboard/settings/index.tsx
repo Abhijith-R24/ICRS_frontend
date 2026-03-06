@@ -1,7 +1,16 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 
 export default function Settings() {
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem("user");
+      router.replace("/login");
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+  };
   return (
     <View style={styles.container}>
       <TouchableOpacity>
@@ -13,12 +22,8 @@ export default function Settings() {
       >
         <Text style={styles.text}>Profile</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => router.push("/dashboard/settings/logout")}
-      >
-        <Text style={styles.text}>Logout</Text>
+      <TouchableOpacity style={styles.option}>
+        <Text style={styles.optionText} onPress={() => router.push("/about")}>About App</Text>
       </TouchableOpacity>
       </TouchableOpacity>
     </View>
@@ -37,4 +42,17 @@ const styles = StyleSheet.create({
   },
 
   text: { fontSize: 18 },
+  option:{
+    backgroundColor:"#fff",
+    borderRadius:15,
+    marginBottom:15,
+    elevation:2,
+    padding:15,
+    
+  },
+  optionText:{
+    fontSize:16,
+    fontWeight:"bold",
+    color:"#000"
+  }
 });
