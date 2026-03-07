@@ -7,34 +7,35 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
-  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Image,
+  Modal,
 } from "react-native";
+import { Video } from "expo-av";
+import { RefreshControl } from "react-native-gesture-handler";
+
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  // Fetch complaints
   const fetchComplaints = async () => {
     try {
       setLoading(true);
       const response = await getAllComplaints();
+
       const data = Array.isArray(response.data)
         ? response.data
         : response.data.complaints || [];
-      const sorted = [...data].sort(
-        (a: any, b: any) => (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0),
-      );
 
-      setComplaints(sorted);
+      setComplaints(data);
     } catch (error: any) {
-      console.log("Error FULL:", error);
-      console.log("ERROR DATA:", error?.response?.data);
-      console.log("ERROR STATUS:", error?.response?.status);
+      console.log("Error:", error);
       Alert.alert("Error", "Failed to fetch complaints");
     } finally {
       setLoading(false);
@@ -45,28 +46,36 @@ export default function AdminScreen() {
   useEffect(() => {
     fetchComplaints();
   }, []);
+
   const onRefresh = () => {
     setRefreshing(true);
     fetchComplaints();
   };
 
-  // Update status
   const handleUpdateStatus = async (id: string, status: string) => {
     try {
       await updateComplaintStatus(id, status);
-
       Alert.alert("Success", `Marked as ${status}`);
-
-      fetchComplaints(); // refresh
+      fetchComplaints();
     } catch (error) {
       console.log("Update error:", error);
       Alert.alert("Error", "Failed to update status");
     }
   };
 
-  // Render each complaint
+  const isImage = (url: string) =>
+    url?.includes(".jpg") || url?.includes(".jpeg") || url?.includes(".png");
+
+  const isVideo = (url: string) =>
+    url?.includes(".mp4") || url?.includes(".mov");
+
   const renderItem = ({ item }: any) => (
     <View style={[styles.card, item.isEmergency && styles.emergencyCard]}>
+
+      {item.isEmergency && (
+        <Text style={styles.emergencyBadge}>🚨 EMERGENCY</Text>
+      )}
+
       <Text style={styles.label}>Name:</Text>
       <Text style={styles.value}>{item.reportedBy}</Text>
 
@@ -78,8 +87,28 @@ export default function AdminScreen() {
 
       <Text style={styles.label}>Status:</Text>
       <Text style={styles.status}>{item.status}</Text>
-      {item.isEmergency && (
-        <Text style={styles.emergencyBadge}>🚨 EMERGENCY</Text>
+
+      {/* Evidence preview */}
+      {item.evidence && (
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedEvidence(item.evidence);
+            setModalVisible(true);
+          }}
+        >
+          {isImage(item.evidence) && (
+            <Image source={{ uri: item.evidence }} style={styles.image} />
+          )}
+
+          {isVideo(item.evidence) && (
+            <Video
+              source={{ uri: item.evidence }}
+              style={styles.video}
+              useNativeControls
+              resizeMode="contain"
+            />
+          )}
+        </TouchableOpacity>
       )}
 
       <View style={styles.buttonRow}>
@@ -100,7 +129,6 @@ export default function AdminScreen() {
     </View>
   );
 
-  // Loading
   if (loading) {
     return (
       <View style={styles.center}>
@@ -123,9 +151,39 @@ export default function AdminScreen() {
         }
         contentContainerStyle={{ paddingBottom: 20 }}
       />
+
+      {/* Fullscreen Evidence */}
+      <Modal visible={modalVisible} transparent={true}>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={() => setModalVisible(false)}
+          >
+            <Text style={{ color: "#fff", fontSize: 18 }}>Close</Text>
+          </TouchableOpacity>
+
+          {selectedEvidence && isImage(selectedEvidence) && (
+            <Image
+              source={{ uri: selectedEvidence }}
+              style={styles.fullImage}
+              resizeMode="contain"
+            />
+          )}
+
+          {selectedEvidence && isVideo(selectedEvidence) && (
+            <Video
+              source={{ uri: selectedEvidence }}
+              style={styles.fullVideo}
+              useNativeControls
+              resizeMode="contain"
+            />
+          )}
+        </View>
+      </Modal>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -148,6 +206,19 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
 
+  emergencyCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: "red",
+    backgroundColor: "#fff5f5",
+  },
+
+  emergencyBadge: {
+    color: "red",
+    fontWeight: "bold",
+    marginBottom: 5,
+    fontSize: 14,
+  },
+
   label: {
     fontSize: 12,
     color: "#666",
@@ -164,6 +235,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "blue",
     marginTop: 5,
+  },
+
+  image: {
+    width: "100%",
+    height: 180,
+    marginTop: 10,
+    borderRadius: 8,
+  },
+
+  video: {
+    width: "100%",
+    height: 180,
+    marginTop: 10,
   },
 
   buttonRow: {
@@ -197,16 +281,27 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  emergencyCard: {
-    borderLeftWidth: 2,
-    borderLeftColor: "red",
-    backgroundColor: "#fff5f5",
+
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
   },
 
-  emergencyBadge: {
-    color: "red",
-    fontWeight: "bold",
-    marginTop: 8,
-    fontSize: 14,
+  closeBtn: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    zIndex: 10,
+  },
+
+  fullImage: {
+    width: "100%",
+    height: "80%",
+  },
+
+  fullVideo: {
+    width: "100%",
+    height: "80%",
   },
 });
