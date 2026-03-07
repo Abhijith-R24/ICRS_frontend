@@ -2,13 +2,10 @@ import { registerUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  Alert,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+  ActivityIndicator,
+  Alert, StyleSheet, Text, TextInput, TouchableOpacity, View
 } from "react-native";
+
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -23,19 +20,6 @@ export default function RegisterScreen() {
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phonePattern = /^[6-9]\d{9}$/;
     const panPattern = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
-
-    if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-    if (!phonePattern.test(phone)) {
-      Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
-      return;
-    }
-    if (!panPattern.test(pan)) {
-      Alert.alert("Invalid PAN", "Enter a valid PAN card number(ABCDE1234F)");
-      return;
-    }
 
     if (
       !fullName.trim() ||
@@ -52,7 +36,7 @@ export default function RegisterScreen() {
       Alert.alert("Error", "Please enter a valid email address");
       return;
     }
-    if (!phonePattern.test(phone)) {
+    if (!phonePattern.test(phone) || phone.trim().length !== 10) {
       Alert.alert("Invalid Phone", "Enter a valid 10 digit Indian number");
       return;
     }
@@ -65,41 +49,33 @@ export default function RegisterScreen() {
 
       return;
     }
-    if (phone.trim().length !== 10) {
-      Alert.alert("Invalid phone number");
-      return;
-    }
-
     setLoading(true);
+    console.log("Submitting registration");
     try {
-      await registerUser({
+      const response = await registerUser({
         username: fullName,
         email,
         password,
         phone: "+91" + phone,
         pan: pan,
       });
-
+      console.log("Registration successful", response);
       setFullName("");
       setEmail("");
       setPassword("");
       setConfirmPassword("");
       setPhone("");
       setPan("");
-
-      // On mobile, use Alert.alert with button callback
       Alert.alert("Success", "Registered successfully!", [
         {
           text: "OK",
-          onPress: () => {
-            router.replace("/login");
-          },
+          onPress: () => router.replace("/login"),
         },
       ]);
     } catch (error: any) {
       const errorMessage =
-        error.response?.data?.message ||
-        error.message ||
+        error?.response?.data?.message ||
+        error?.message ||
         "Something went wrong";
       Alert.alert("Registration Failed", errorMessage);
     } finally {
@@ -110,9 +86,9 @@ export default function RegisterScreen() {
     fullName.trim() !== "" &&
     email.trim() !== "" &&
     password.trim() !== "" &&
-    phone.trim() !== "" &&
-    phone.trim().length === 10 &&
     confirmPassword.trim() !== "" &&
+    phone.trim() !== "" &&
+    pan.trim() !== "" &&
     password === confirmPassword &&
     /^[6-9]\d{9}$/.test(phone) &&
     /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(pan) &&
@@ -191,11 +167,13 @@ export default function RegisterScreen() {
       <TouchableOpacity
         style={[styles.button, !isFormValid && styles.buttonDisabled]}
         onPress={handleSubmit}
-        disabled={!isFormValid}
+        disabled={!isFormValid || loading}
       >
-        <Text style={styles.buttonText}>
-          {loading ? "Registering..." : "Register"}
-        </Text>
+        {loading ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.buttonText}>Register</Text>
+        )}
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
@@ -275,6 +253,8 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled: {
+    opacity: 100,
 
   },
-});
+})
+  ;

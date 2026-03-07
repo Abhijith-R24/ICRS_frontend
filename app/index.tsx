@@ -37,7 +37,7 @@ return (
         transform: [{ scale: scaleAnim }],
         opacity: fadeAnim,
       }]}>
-      <Image source={require('assets/images/CC.png')} style={styles.logo}/>
+      <Image source={require('assets/images/CC.png')} style={styles.logo} />
       </Animated.View>
 
     </View>

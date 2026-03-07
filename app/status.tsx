@@ -1,7 +1,8 @@
 import { getMyComplaints } from "@/.vscode/services/complaint"; // adjust path if needed
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback,useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import {
   ActivityIndicator,
   Alert,
@@ -27,7 +28,7 @@ export default function StatusPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints
-  const fetchComplaints = async () => {
+  const fetchComplaints = useCallback(async () => {
     try {
       setLoading(true);
       const userData = await AsyncStorage.getItem("user");
@@ -53,11 +54,11 @@ export default function StatusPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    fetchComplaints();
   }, []);
+
+  useFocusEffect(useCallback(() => {
+    fetchComplaints();
+  }, [fetchComplaints]));
   const onRefresh = () => {
     setRefreshing(true);
     fetchComplaints();
@@ -92,7 +93,7 @@ export default function StatusPage() {
 
       <FlatList
         data={complaints}
-        keyExtractor={(item) => item._id}
+        keyExtractor={(item) => item._id.toString()}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }

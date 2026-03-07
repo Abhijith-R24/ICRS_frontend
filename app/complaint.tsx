@@ -26,7 +26,7 @@ export default function ComplaintScreen() {
   const [location, setLocation] = useState("");
   const [crimeType, setCrimeType] = useState("");
   const [description, setDescription] = useState("");
-  const [date, setDate] = useState(""); // YYYY-MM-DD format
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]); // YYYY-MM-DD format
   const [images, setImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [documents, setDocuments] = useState<string[]>([]);
@@ -100,8 +100,10 @@ export default function ComplaintScreen() {
 
     setLoading(true);
     try {
-      const response = await submitComplaint({
-        userId,
+      const userData = await AsyncStorage.getItem("user");
+      const parsedUser = JSON.parse(userData || "{}");
+     const response = await submitComplaint({
+        userId:parsedUser.userId,
         reportedBy: name,
         phone: "+91" + phone,
         email,

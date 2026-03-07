@@ -138,7 +138,7 @@ export default function DashboardScreen() {
         <FlatList
           data={complaints.slice(0, 5)} // Show last 5
           keyExtractor={(item) =>
-            item._id || item.id || Math.random().toString()
+            item._id || item.id || item._id.toString()
           }
           renderItem={({ item }) => (
             <View style={styles.reportCard}>
