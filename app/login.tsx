@@ -1,140 +1,169 @@
-import { loginUser } from "@/.vscode/services/auth";
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform
+} from "react-native";
 import { router } from "expo-router";
-import { useState } from "react";
-import {ActivityIndicator, Alert,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MaterialIcons } from "@expo/vector-icons";
 
 export default function LoginScreen() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const handleSubmit = async () => {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Check if fields are empty
-    if (!email.trim() || !password.trim()) {
-      Alert.alert("Error", "Please fill all required fields");
-      return;
-    }
-
-    // Validate email format
-    if (!emailPattern.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address");
-      return;
-    }
-
-    // If everything is valid → Navigate
-    // router.replace("/dashboard");
-    try {
-      setLoading(true);
-      const response = await loginUser({
-        email: email.trim(),
-        password,
-      });
-      await AsyncStorage.setItem("user",JSON.stringify(response.data));
-
-      console.log("Login success", response.data);
-      const isAdmin = response?.data?.isAdmin 
-
-      setEmail("");
-      setPassword("");
-      if (isAdmin) {
-        router.replace("/admin");
-      } else {
-        router.replace("/dashboard");
-      }
-    } catch (error: any) {
-      const msg =
-        error?.response?.data?.message ||
-        error.message ||
-        "Login failed. Please try again.";
-
-      Alert.alert("Login Failed", msg);
-    } finally {
-      setLoading(false);
-    }
- 
-  } 
-  const isFormValid = email.trim() !== "" && password.trim() !== "";
+  const handleLogin = () => {
+    router.replace("/dashboard");
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Welcome Back!!</Text>
 
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={email}
-        onChangeText={setEmail}
-      />
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
 
-      <TextInput
-        style={styles.input}
-        placeholder="Password "
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
+      {/* Header */}
+      <View style={styles.header}>
+        <MaterialIcons name="security" size={70} color="#fff" />
+        <Text style={styles.appTitle}>Crime Connect</Text>
+        <Text style={styles.subtitle}>Integrated Crime Reporting System</Text>
+      </View>
 
-      <TouchableOpacity style={[
-        styles.button,
-        (!isFormValid || loading) && { opacity : 100},
-      ]}
-      onPress={handleSubmit}
-      disabled={!isFormValid || loading}
-      >
-        {loading ? (
-        <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
-      </TouchableOpacity>
+      {/* Login Card */}
+      <View style={styles.card}>
 
-      <TouchableOpacity onPress={() => router.push("/register")}>
-        <Text style={styles.link}>Don’t have an account? Register</Text>
-      </TouchableOpacity>
-    </View>
+        <Text style={styles.title}>Welcome Back</Text>
+
+        {/* Email */}
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="email" size={22} color="#777" />
+          <TextInput
+            placeholder="Email"
+            style={styles.input}
+            value={email}
+            onChangeText={setEmail}
+          />
+        </View>
+
+        {/* Password */}
+        <View style={styles.inputContainer}>
+          <MaterialIcons name="lock" size={22} color="#777" />
+          <TextInput
+            placeholder="Password"
+            style={styles.input}
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+        </View>
+
+        {/* Login Button */}
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <Text style={styles.loginText}>Login</Text>
+        </TouchableOpacity>
+
+        {/* Register */}
+        <Text style={styles.registerText}>
+          Don't have an account?{" "}
+          <Text
+            style={styles.registerLink}
+            onPress={() => router.push("/register")}
+          >
+            Register
+          </Text>
+        </Text>
+
+      </View>
+
+    </KeyboardAvoidingView>
   );
-};
+}
+
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
+    backgroundColor: "#0f172a",
     justifyContent: "center",
-    padding: 24,
-    backgroundColor: "#fff",
   },
-  title: {
+
+  header: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+
+  appTitle: {
     fontSize: 28,
-    textAlign: "center",
-    marginBottom: 10,
-    color: "#000000",
-    fontFamily: "roboto-700",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ddd",
+    color: "#fff",
     fontWeight: "bold",
-    padding: 12,
-    borderRadius: 8,
+    marginTop: 10,
+  },
+
+  subtitle: {
+    color: "#cbd5e1",
+    fontSize: 13,
+    marginTop: 5,
+  },
+
+  card: {
+    backgroundColor: "#fff",
+    marginHorizontal: 25,
+    borderRadius: 20,
+    padding: 25,
+    elevation: 10,
+  },
+
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 10,
+    paddingHorizontal: 12,
     marginBottom: 15,
   },
-  button: {
-    backgroundColor: "#000000",
-    padding: 15,
-    borderRadius: 8,
+
+  input: {
+    flex: 1,
+    padding: 12,
+    fontSize: 16,
   },
-  buttonText: {
-    color: "#ffffff",
-    textAlign: "center",
+
+  loginButton: {
+    backgroundColor: "#0f172a",
+    padding: 15,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 10,
+  },
+
+  loginText: {
+    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
   },
-  buttonDisabled: {},
-  link: {
-    textAlign: "center",
-    marginTop: 20,
-  },
-});
 
+  registerText: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#555",
+  },
+
+  registerLink: {
+    color: "#2563eb",
+    fontWeight: "bold",
+  }
+
+});
