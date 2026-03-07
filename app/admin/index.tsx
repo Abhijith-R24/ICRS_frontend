@@ -1,11 +1,18 @@
 import {
   getAllComplaints,
   updateComplaintStatus,
-} from "@/.vscode/services/admin"
+} from "@/.vscode/services/admin";
 import { useEffect, useState } from "react";
-import {ActivityIndicator,Alert,FlatList,StyleSheet,Text,TouchableOpacity,View,
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import {RefreshControl} from "react-native-gesture-handler";
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -16,11 +23,12 @@ export default function AdminScreen() {
     try {
       setLoading(true);
       const response = await getAllComplaints();
-      const data =Array.isArray(response.data)
-      ?response.data
-      :response.data.complaints || [];
-      const sorted = data.sort(
-        (a:any,b:any)=> (b.isEmergency  ? 1:0)-(a.isEmergency ? 1:0));
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data.complaints || [];
+      const sorted = [...data].sort(
+        (a: any, b: any) => (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0),
+      );
 
       setComplaints(sorted);
     } catch (error: any) {
@@ -58,8 +66,7 @@ export default function AdminScreen() {
 
   // Render each complaint
   const renderItem = ({ item }: any) => (
-    <View style={[styles.card ,
-       item.isEmergency && styles.emergencyCard]}>
+    <View style={[styles.card, item.isEmergency && styles.emergencyCard]}>
       <Text style={styles.label}>Name:</Text>
       <Text style={styles.value}>{item.reportedBy}</Text>
 

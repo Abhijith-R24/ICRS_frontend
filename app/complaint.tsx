@@ -1,4 +1,4 @@
-import { markEmergency, submitComplaint } from "@/.vscode/services/complaint";
+import { submitComplaint } from "@/.vscode/services/complaint";
 import { Picker } from "@react-native-picker/picker";
 import { ResizeMode, Video } from "expo-av";
 import * as DocumentPicker from "expo-document-picker";
@@ -6,9 +6,18 @@ import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 
-import { Alert, Image, Platform, Pressable, ScrollView, StyleSheet,
-   Text, TextInput,FlatList, TouchableOpacity, View } from "react-native";
-   import AsyncStorage from "@react-native-async-storage/async-storage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  Alert,
+  Image,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 export default function ComplaintScreen() {
   const [name, setName] = useState("");
@@ -23,14 +32,16 @@ export default function ComplaintScreen() {
   const [documents, setDocuments] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const [isEmergency,setIsEmergency] = useState(false); //Emergency state
- const [userId,setUserId]=useState<String | null>(null);
+  const [isEmergency, setIsEmergency] = useState(false); //Emergency state
+  const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     const loadUser = async () => {
       const storedUser = await AsyncStorage.getItem("user");
+      console.log("RAW userData:", storedUser); // ✅ paste what this shows
       if (storedUser) {
-        const parsed=JSON.parse(storedUser);
-        setUserId(parsed._id);
+        const parsed = JSON.parse(storedUser);
+        console.log("parsed._id:", parsed._id);
+        setUserId(parsed.userId || parsed._id);
       }
     };
     loadUser();
@@ -40,7 +51,6 @@ export default function ComplaintScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
     });
-   
 
     if (!result.canceled) {
       setImages((prev) => [...prev, result.assets[0].uri]);
@@ -69,17 +79,22 @@ export default function ComplaintScreen() {
 
   const handleSubmit = async () => {
     // Validate all fields
-    if (!name || !phone || !email || !location || !description || !date || !crimeType) {
-        Alert.alert("Error", "Please fill all required fields");
+    if (
+      !name ||
+      !phone ||
+      !email ||
+      !location ||
+      !description ||
+      !date ||
+      !crimeType
+    ) {
+      Alert.alert("Error", "Please fill all required fields");
       return;
     }
 
-   
-
     // Validate phone length
     if (phone.length !== 10) {
-    
-        Alert.alert("Error", "Phone number must be 10 digits");
+      Alert.alert("Error", "Phone number must be 10 digits");
       return;
     }
 
@@ -112,7 +127,8 @@ export default function ComplaintScreen() {
       setDescription("");
       setDate(new Date().toISOString().split("T")[0]); // Reset to today
       setImages([]);
-      setVideos([]); setDocuments([]);
+      setVideos([]);
+      setDocuments([]);
       // On mobile, use Alert with callback
       Alert.alert("Success", "Complaint Registered Successfully", [
         {
@@ -120,7 +136,6 @@ export default function ComplaintScreen() {
           onPress: () => router.replace("/status"),
         },
       ]);
-
     } catch (error: any) {
       console.error("Complaint submission error:", error);
       const errorMessage =
@@ -128,7 +143,6 @@ export default function ComplaintScreen() {
         error.message ||
         "Something went wrong";
       Alert.alert("Error", errorMessage);
-
     } finally {
       setLoading(false);
     }
@@ -166,7 +180,7 @@ export default function ComplaintScreen() {
             maxLength={10}
             value={phone}
             onChangeText={(text) => {
-              const numericText = text.replace(/[^0-9]/g, "").slice(0, 10); 
+              const numericText = text.replace(/[^0-9]/g, "").slice(0, 10);
               // Remove non-numeric characters and limit to 10 digits
               setPhone(numericText);
             }}
@@ -222,9 +236,10 @@ export default function ComplaintScreen() {
         <Text style={styles.charCount}>{description.length}/500</Text>
         {/*Emergency button*/}
         <TouchableOpacity
-        style={[styles.emergencyBtn,isEmergency && styles.emergencyActive,]} 
-        onPress={() => setIsEmergency (!isEmergency)}>
-          <Text style ={styles.emergencyText}>
+          style={[styles.emergencyBtn, isEmergency && styles.emergencyActive]}
+          onPress={() => setIsEmergency(!isEmergency)}
+        >
+          <Text style={styles.emergencyText}>
             {isEmergency ? "Emergency Enabled 🚨" : "Mark as Emergency"}
           </Text>
         </TouchableOpacity>
@@ -459,5 +474,5 @@ const styles = StyleSheet.create({
   },
   emergencyActive: {
     backgroundColor: "red",
-  }
+  },
 });

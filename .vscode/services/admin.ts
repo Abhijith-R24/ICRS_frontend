@@ -7,12 +7,15 @@ export const getAllComplaints = async () => {
 
 // Update complaint status
 export const updateComplaintStatus = async (id: string, status: string) => {
-  return API.put(`/api/admin/complaint/${id}/status`, {
-    status,
-  });
+  return API.put(
+    `https://8psmpbxw-8000.inc1.devtunnels.ms/api/admin/complaint/${id}/status`,
+    {
+      status,
+    },
+  );
 };
 
 // // Get only emergency complaints
- export const getEmergencyComplaints = async () => {
- return API.get("/api/complaints/emergency");
- };
+export const getEmergencyComplaints = async (id: string) => {
+  return API.get(`/api/complaint/${id}/emergency`);
+};

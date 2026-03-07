@@ -1,4 +1,5 @@
 import { loginUser } from "@/.vscode/services/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -9,13 +10,13 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const handleSubmit = async () => {
+    await AsyncStorage.clear(); // ✅ add this temporarily to clear old data
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     // Check if fields are empty
@@ -38,10 +39,13 @@ export default function LoginScreen() {
         email: email.trim(),
         password,
       });
-      await AsyncStorage.setItem("user",JSON.stringify(response.data));
 
       console.log("Login success", response.data);
-      const isAdmin = response?.data?.isAdmin 
+
+      const userData = response.data;
+      await AsyncStorage.setItem("user", JSON.stringify(userData)); // ✅ saves _id correctly
+
+      const isAdmin = userData?.isAdmin; // ✅ reads from userData
 
       setEmail("");
       setPassword("");
@@ -60,8 +64,7 @@ export default function LoginScreen() {
     } finally {
       setLoading(false);
     }
- 
-  } 
+  };
   const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   return (
@@ -85,15 +88,13 @@ export default function LoginScreen() {
         onChangeText={setPassword}
       />
 
-      <TouchableOpacity style={[
-        styles.button,
-        (!isFormValid || loading) && { opacity : 0.6},
-      ]}
-      onPress={handleSubmit}
-      disabled={!isFormValid || loading}
+      <TouchableOpacity
+        style={[styles.button, (!isFormValid || loading) && { opacity: 0.6 }]}
+        onPress={handleSubmit}
+        disabled={!isFormValid || loading}
       >
         {loading ? (
-        <Text style={styles.buttonText}>Loginging in..</Text>
+          <Text style={styles.buttonText}>Loginging in..</Text>
         ) : (
           <Text style={styles.buttonText}>Login</Text>
         )}
@@ -104,7 +105,7 @@ export default function LoginScreen() {
       </TouchableOpacity>
     </View>
   );
-};
+}
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -144,4 +145,3 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
 });
-
