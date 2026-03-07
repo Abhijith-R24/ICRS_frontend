@@ -1,13 +1,17 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import { router } from "expo-router";
 
 export default function Logout() {
-  const handleLogout = () => {
+  const handleLogout = async () => {
     Alert.alert("Logout", "Are you sure you want to logout?", [
       { text: "Cancel" },
       {
         text: "Logout",
-        onPress: () => router.replace("/login"),
+        onPress: async () => {
+          await AsyncStorage.clear();
+          router.replace("/login");
+        },
       },
     ]);
   };

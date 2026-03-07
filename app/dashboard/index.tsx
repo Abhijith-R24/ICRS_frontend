@@ -1,13 +1,18 @@
-import React, { useState, useEffect } from "react";
-import {View,Text,StyleSheet,TouchableOpacity,FlatList,StatusBar,ActivityIndicator,Alert}from "react-native";
-import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { getComplaints } from "@/.vscode/services/complaint";
+import { FontAwesome5, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons";
-import { DrawerActions } from "@react-navigation/native";
-import { getMyComplaints } from "@/.vscode/services/complaint";
-import {RefreshControl} from "react-native-gesture-handler";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  FlatList,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { RefreshControl } from "react-native-gesture-handler";
 
 export default function DashboardScreen() {
   const navigation = useNavigation<any>();
@@ -19,48 +24,40 @@ export default function DashboardScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   // Fetch complaints from API
-    const fetchComplaints = async () => {
-      try {
-        setLoading(true);
-        const userData= await AsyncStorage.getItem("user");
-        if(!userData){
-          Alert.alert("Error", "User not found");
-          return;
-        }
-        const parsedUser = JSON.parse(userData);
-        const userId = parsedUser.userId || parsedUser._id || parsedUser.user._id;
-        const response = await getMyComplaints(userId);
-        console.log("Fetched complaints:", response.data);
-         
+  const fetchComplaints = async () => {
+    try {
+      setLoading(true);
+      const response = await getComplaints();
+      console.log("Fetched complaints:", response.data);
 
-        const complaintsData = Array.isArray(response.data)
-          ? response.data
-          : response.data.complaints || [];
-        setComplaints(complaintsData);
+      const complaintsData = Array.isArray(response.data)
+        ? response.data
+        : response.data.complaints || [];
+      setComplaints(complaintsData);
 
-        // Calculate statistics
-        setTotalReports(complaintsData.length);
+      // Calculate statistics
+      setTotalReports(complaintsData.length);
 
-        // Count active cases (not resolved)
-        const active = complaintsData.filter(
-          (c: any) => c.status !== "Resolved" && c.status !== "resolved",
-        ).length;
-        setActiveCases(active);
+      // Count active cases (not resolved)
+      const active = complaintsData.filter(
+        (c: any) => c.status !== "Resolved" && c.status !== "resolved",
+      ).length;
+      setActiveCases(active);
 
-        // Count resolved
-        const resolvedCount = complaintsData.filter(
-          (c: any) => c.status === "Resolved" || c.status === "resolved",
-        ).length;
-        setActiveCases(active);
-        setResolved(resolvedCount);
-      } catch (error) {
-        console.error("Error fetching complaints:", error);
-        setComplaints([]);
-      } finally {
-        setLoading(false);
-        setRefreshing(false);
-      }
-    };
+      // Count resolved
+      const resolvedCount = complaintsData.filter(
+        (c: any) => c.status === "Resolved" || c.status === "resolved",
+      ).length;
+      setActiveCases(active);
+      setResolved(resolvedCount);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+      setComplaints([]);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
   useEffect(() => {
     fetchComplaints();
   }, []);
@@ -77,11 +74,10 @@ export default function DashboardScreen() {
       <StatusBar barStyle="light-content" />
       {/* Header */}
       <View style={styles.header}>
-        
         <Text style={styles.headerTitle}>CRIME CONNECT</Text>
         <View style={{ width: 28 }} />
         <TouchableOpacity onPress={() => router.push("/dashboard/settings")}>
-          <Ionicons name="settings-outline" size={26} color="#000" />
+          <Ionicons name="settings-outline" size={26} color="#000000" />
         </TouchableOpacity>
       </View>
 
@@ -146,11 +142,15 @@ export default function DashboardScreen() {
           }
           renderItem={({ item }) => (
             <View style={styles.reportCard}>
-              <Text style={styles.reportType}>{item.crimeType || "unknown"}</Text>
+              <Text style={styles.reportType}>
+                {item.crimeType || "unknown"}
+              </Text>
               <Text style={styles.reportStatus}>
                 {item.status || "Pending"}
               </Text>
-              <Text style={styles.reportSubtext}>{item.location || "Location not provided"}</Text>
+              <Text style={styles.reportSubtext}>
+                {item.location || "Location not provided"}
+              </Text>
             </View>
           )}
           refreshControl={
@@ -300,5 +300,5 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     fontSize: 16,
-  }
+  },
 });

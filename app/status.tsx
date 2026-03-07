@@ -1,8 +1,18 @@
-import { getMyComplaints } from '@/.vscode/services/complaint'; // adjust path if needed
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { getMyComplaints } from "@/.vscode/services/complaint"; // adjust path if needed
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useCallback,useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 type Complaint = {
   _id: string;
   crimeType: string;
@@ -22,28 +32,21 @@ export default function StatusPage() {
     try {
       setLoading(true);
       const userData = await AsyncStorage.getItem("user");
-
       if (!userData) {
         Alert.alert("Error", "User not found");
         return;
       }
       const parsedUser = JSON.parse(userData);
-
-      const userId =
-        parsedUser.userId ||
-        parsedUser._id ||
-        parsedUser.user?._id;
-
-      console.log("User ID:", userId);
-
-      const response = await getMyComplaints(userId);
-
-      console.log("Fetched complaints:", response.data);
-      const sorted = [...response.data].sort((a: Complaint, b: Complaint) =>
-        (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0)
+      const response = await getMyComplaints(parsedUser._id);
+      const data = Array.isArray(response.data)
+        ? response.data
+        : response.data.complaints || [];
+      console.log("Fetched complaints:", data);
+      const sorted = [...data].sort(
+        (a: Complaint, b: Complaint) =>
+          (b.isEmergency ? 1 : 0) - (a.isEmergency ? 1 : 0),
       );
       setComplaints(sorted);
-
     } catch (error: any) {
       console.log("Fetch error:", error);
       Alert.alert("Error", "Failed to load complaints");
@@ -92,10 +95,7 @@ export default function StatusPage() {
         data={complaints}
         keyExtractor={(item) => item._id.toString()}
         refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         ListEmptyComponent={<Text>No complaints found</Text>}
         renderItem={({ item }) => (
@@ -110,7 +110,9 @@ export default function StatusPage() {
             <Text style={styles.value}>{item.location}</Text>
 
             <Text style={styles.label}>Status</Text>
-            <Text style={[styles.status, { color: getStatusColor(item.status) }]}>
+            <Text
+              style={[styles.status, { color: getStatusColor(item.status) }]}
+            >
               {item.status}
             </Text>
 
@@ -124,7 +126,7 @@ export default function StatusPage() {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push('/dashboard')}
+        onPress={() => router.push("/dashboard")}
       >
         <Text style={styles.buttonText}>Back to Dashboard</Text>
       </TouchableOpacity>
@@ -135,18 +137,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
 
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: "bold",
+    textAlign: "center",
     marginVertical: 20,
   },
 
   card: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: "#f9f9f9",
     padding: 15,
     borderRadius: 10,
     marginBottom: 15,
@@ -155,26 +157,26 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 12,
-    color: '#666',
+    color: "#666",
     marginTop: 5,
   },
 
   value: {
     fontSize: 15,
-    fontWeight: 'bold',
-    color: '#000',
+    fontWeight: "bold",
+    color: "#000",
   },
 
   status: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginTop: 5,
   },
 
   emergency: {
     marginTop: 10,
-    color: 'red',
-    fontWeight: 'bold',
+    color: "red",
+    fontWeight: "bold",
   },
 
   button: {
@@ -185,19 +187,19 @@ const styles = StyleSheet.create({
   },
 
   buttonText: {
-    color: '#fff',
-    textAlign: 'center',
-    fontWeight: 'bold',
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 
   loader: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   emergencyCard: {
     borderLeftWidth: 5,
     borderLeftColor: "red",
     backgroundColor: "#fff3cd",
-  }
+  },
 });
