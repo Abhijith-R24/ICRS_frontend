@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,128 +5,123 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
-  ScrollView
 } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import { router } from "expo-router";
 
-export default function EditProfileScreen() {
+export default function EditProfile() {
 
-  const [fullName, setFullName] = useState("Arya Lakshmi");
-  const [email, setEmail] = useState("arya@email.com");
-  const [phone, setPhone] = useState("9876543210");
-  const [address, setAddress] = useState("Trikkandiyur, Kerala");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [pan, setPan] = useState("");
 
-  const handleUpdate = () => {
-    Alert.alert("Success", "Profile updated successfully!");
-    
-    // Here you can call your API
-    // updateProfile({fullName,email,phone,address})
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    const storedUser = await AsyncStorage.getItem("user");
+
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+
+      setUsername(user.username);
+      setEmail(user.email);
+      setPhone(user.phone);
+      setPan(user.pan);
+    }
+  };
+
+  const handleSave = async () => {
+    const updatedUser = {
+      username,
+      email,
+      phone,
+      pan,
+    };
+
+    await AsyncStorage.setItem("user", JSON.stringify(updatedUser));
+
+    Alert.alert("Success", "Profile updated successfully");
+
+    router.back();
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
 
       <Text style={styles.title}>Edit Profile</Text>
 
-      {/* Full Name */}
-      <View style={styles.inputContainer}>
-        <MaterialIcons name="person" size={22} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Full Name"
-          value={fullName}
-          onChangeText={setFullName}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        value={username}
+        onChangeText={setUsername}
+        placeholder="Username"
+      />
 
-      {/* Email */}
-      <View style={styles.inputContainer}>
-        <MaterialIcons name="email" size={22} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={setEmail}
+        placeholder="Email"
+      />
 
-      {/* Phone */}
-      <View style={styles.inputContainer}>
-        <MaterialIcons name="phone" size={22} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Phone Number"
-          value={phone}
-          keyboardType="numeric"
-          onChangeText={setPhone}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        value={phone}
+        onChangeText={setPhone}
+        placeholder="Phone"
+      />
 
-      {/* Address */}
-      <View style={styles.inputContainer}>
-        <MaterialIcons name="location-on" size={22} color="#555" />
-        <TextInput
-          style={styles.input}
-          placeholder="Address"
-          value={address}
-          onChangeText={setAddress}
-        />
-      </View>
+      <TextInput
+        style={styles.input}
+        value={pan}
+        onChangeText={setPan}
+        placeholder="PAN Number"
+      />
 
-      {/* Save Button */}
-      <TouchableOpacity style={styles.button} onPress={handleUpdate}>
+      <TouchableOpacity style={styles.button} onPress={handleSave}>
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
 
-    </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
 
-  container: {
-    flexGrow: 1,
-    backgroundColor: "#f5f5f5",
-    padding: 20,
-    justifyContent: "center"
+  container:{
+    flex:1,
+    padding:20,
+    backgroundColor:"#f4f6f9"
   },
 
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    marginBottom: 30,
-    textAlign: "center",
-    color: "#333"
+  title:{
+    fontSize:22,
+    fontWeight:"bold",
+    marginBottom:20
   },
 
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    padding: 12,
-    borderRadius: 10,
-    marginBottom: 15,
-    elevation: 2
+  input:{
+    backgroundColor:"#fff",
+    padding:15,
+    borderRadius:10,
+    marginBottom:15,
+    elevation:2
   },
 
-  input: {
-    flex: 1,
-    marginLeft: 10,
-    fontSize: 16
+  button:{
+    backgroundColor:"#000",
+    padding:15,
+    borderRadius:10,
+    alignItems:"center"
   },
 
-  button: {
-    backgroundColor: "#007BFF",
-    padding: 15,
-    borderRadius: 10,
-    alignItems: "center",
-    marginTop: 20
-  },
-
-  buttonText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold"
+  buttonText:{
+    color:"#fff",
+    fontWeight:"bold"
   }
 
 });

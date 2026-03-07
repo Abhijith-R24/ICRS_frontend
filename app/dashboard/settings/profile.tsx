@@ -73,7 +73,7 @@ export default function ProfileScreen() {
       </View>
 
       {/* Buttons */}
-      <TouchableOpacity style={styles.editButton}>
+      <TouchableOpacity style={styles.editButton}
         <Text style={styles.editText}>Edit Profile</Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handleLogout}>
