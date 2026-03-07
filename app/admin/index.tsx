@@ -2,8 +2,10 @@ import {
   getAllComplaints,
   updateComplaintStatus,
 } from "@/.vscode/services/admin"
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import {ActivityIndicator,Alert,FlatList,StyleSheet,Text,TouchableOpacity,View,
+import {ActivityIndicator,Alert,FlatList,StatusBar,StyleSheet,Text,TouchableOpacity,View,
 } from "react-native";
 import {RefreshControl} from "react-native-gesture-handler";
 export default function AdminScreen() {
@@ -105,7 +107,16 @@ export default function AdminScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Admin Dashboard</Text>
+            {/* Header */}
+            <View style={styles.header}>
+              
+              <Text style={styles.headerTitle}>Admin Dashboard</Text>
+              <View style={{ width: 28 }} />
+              <TouchableOpacity onPress={() => router.push("/admin/adminsettings")}>
+                <Ionicons name="settings-outline" size={26} color="#000" />
+              </TouchableOpacity>
+            </View>
+            
 
       <FlatList
         data={complaints}
@@ -202,4 +213,24 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
   },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 20,
+    elevation: 2,
+    backgroundColor: "#fff",
+  },
+
+  headerTitle: {
+    color: "#000000",
+    marginTop: 30,
+    fontSize: 22,
+    fontWeight: "bold",
+    textAlign: "center",
+    justifyContent: "center",
+    flex: 1,
+    marginLeft: 35,
+  }
 });

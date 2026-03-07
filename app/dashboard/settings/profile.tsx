@@ -23,14 +23,15 @@ export default function ProfileScreen() {
 
   const loadUser = async () => {
     try {
-      const storedUser = await AsyncStorage.getItem("user");
+      const userData = await AsyncStorage.getItem("user");
+      console.log("Stored user:", userData);
 
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
+      if (userData) {
+        setUser(JSON.parse(userData));
       }
     } catch (error) {
       console.log("Error loading user:", error);
-    } finally {
+    } finally { 
       setLoading(false);
     }
   };
@@ -68,8 +69,8 @@ export default function ProfileScreen() {
           style={styles.avatar}
         />
 
-        <Text style={styles.name}>{user?.username || "User"}</Text>
-        <Text style={styles.email}>{user?.email || "No Email"}</Text>
+        <Text style={styles.name}>{user?.username}</Text>
+        <Text style={styles.email}>{user?.email }</Text>
       </View>
 
       {/* Info Section */}
@@ -79,7 +80,7 @@ export default function ProfileScreen() {
           <MaterialIcons name="phone" size={22} color="#555" />
           <View style={styles.info}>
             <Text style={styles.label}>Phone</Text>
-            <Text style={styles.value}>{user?.phone || "Not Available"}</Text>
+            <Text style={styles.value}>{user?.phone}</Text>
           </View>
         </View>
 
@@ -87,7 +88,7 @@ export default function ProfileScreen() {
           <MaterialIcons name="credit-card" size={22} color="#555" />
           <View style={styles.info}>
             <Text style={styles.label}>PAN Number</Text>
-            <Text style={styles.value}>{user?.pan || "Not Available"}</Text>
+            <Text style={styles.value}>{user?.pan}</Text>
           </View>
         </View>
 
@@ -95,7 +96,7 @@ export default function ProfileScreen() {
           <MaterialIcons name="badge" size={22} color="#555" />
           <View style={styles.info}>
             <Text style={styles.label}>User ID</Text>
-            <Text style={styles.value}>{user?.userId || "N/A"}</Text>
+            <Text style={styles.value}>{user?.userId }</Text>
           </View>
         </View>
 
@@ -180,6 +181,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     fontWeight: "bold",
+    color:"#000",
     marginTop: 2,
   },
 
