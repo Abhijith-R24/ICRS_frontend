@@ -1,173 +1,139 @@
-
-import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  TouchableOpacity,
-  StatusBar
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
-import { MaterialIcons } from "@expo/vector-icons";
+import { loginUser } from "@/.vscode/services/auth";
 import { router } from "expo-router";
+import { useState } from "react";
+import {ActivityIndicator, Alert,StyleSheet,Text,TextInput,TouchableOpacity,View} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LoginScreen() {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const handleSubmit = async () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const handleLogin = () => {
-    router.replace("/dashboard");
-  };
+    // Check if fields are empty
+    if (!email.trim() || !password.trim()) {
+      Alert.alert("Error", "Please fill all required fields");
+      return;
+    }
+
+    // Validate email format
+    if (!emailPattern.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
+      return;
+    }
+
+    // If everything is valid → Navigate
+    // router.replace("/dashboard");
+    try {
+      setLoading(true);
+      const response = await loginUser({
+        email: email.trim(),
+        password,
+      });
+      await AsyncStorage.setItem("user",JSON.stringify(response.data));
+
+      console.log("Login success", response.data);
+      const isAdmin = response?.data?.isAdmin 
+
+      setEmail("");
+      setPassword("");
+      if (isAdmin) {
+        router.replace("/admin");
+      } else {
+        router.replace("/dashboard");
+      }
+    } catch (error: any) {
+      const msg =
+        error?.response?.data?.message ||
+        error.message ||
+        "Login failed. Please try again.";
+
+      Alert.alert("Login Failed", msg);
+    } finally {
+      setLoading(false);
+    }
+ 
+  } 
+  const isFormValid = email.trim() !== "" && password.trim() !== "";
 
   return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Welcome Back!!</Text>
 
-    <LinearGradient
-      colors={["#1e3a8a", "#0f172a", "#020617"]}
-      style={styles.container}
-    >
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={email}
+        onChangeText={setEmail}
+      />
 
-      <StatusBar barStyle="light-content" />
+      <TextInput
+        style={styles.input}
+        placeholder="Password "
+        secureTextEntry
+        value={password}
+        onChangeText={setPassword}
+      />
 
-      {/* Title Section */}
-      <View style={styles.topSection}>
-        <MaterialIcons name="security" size={70} color="#fff" />
-        <Text style={styles.appName}>Crime Connect</Text>
-        <Text style={styles.tagline}>Report. Track. Stay Safe.</Text>
-      </View>
-
-      {/* Login Card */}
-      <View style={styles.card}>
-
-        <Text style={styles.title}>Welcome Back</Text>
-
-        {/* Email */}
-        <View style={styles.inputBox}>
-          <MaterialIcons name="email" size={22} color="#555" />
-          <TextInput
-            placeholder="Email"
-            placeholderTextColor="#777"
-            style={styles.input}
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-
-        {/* Password */}
-        <View style={styles.inputBox}>
-          <MaterialIcons name="lock" size={22} color="#555" />
-          <TextInput
-            placeholder="Password"
-            placeholderTextColor="#777"
-            secureTextEntry
-            style={styles.input}
-            value={password}
-            onChangeText={setPassword}
-          />
-        </View>
-
-        {/* Login Button */}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+      <TouchableOpacity style={[
+        styles.button,
+        (!isFormValid || loading) && { opacity : 100},
+      ]}
+      onPress={handleSubmit}
+      disabled={!isFormValid || loading}
+      >
+        {loading ? (
+        <ActivityIndicator color="#fff" />
+        ) : (
           <Text style={styles.buttonText}>Login</Text>
-        </TouchableOpacity>
+        )}
+      </TouchableOpacity>
 
-        {/* Register */}
-        <Text style={styles.registerText}>
-          Don't have an account?{" "}
-          <Text
-            style={styles.registerLink}
-            onPress={() => router.push("/register")}
-          >
-            Register
-          </Text>
-        </Text>
-
-      </View>
-
-    </LinearGradient>
+      <TouchableOpacity onPress={() => router.push("/register")}>
+        <Text style={styles.link}>Don’t have an account? Register</Text>
+      </TouchableOpacity>
+    </View>
   );
-}
-
+};
 const styles = StyleSheet.create({
-
-  container:{
-    flex:1,
-    justifyContent:"center",
-    padding:25
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    padding: 24,
+    backgroundColor: "#fff",
   },
-
-  topSection:{
-    alignItems:"center",
-    marginBottom:40
+  title: {
+    fontSize: 28,
+    textAlign: "center",
+    marginBottom: 10,
+    color: "#000000",
+    fontFamily: "roboto-700",
   },
-
-  appName:{
-    fontSize:28,
-    fontWeight:"bold",
-    color:"#fff",
-    marginTop:10
+  input: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    fontWeight: "bold",
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 15,
   },
-
-  tagline:{
-    color:"#cbd5e1",
-    marginTop:5
+  button: {
+    backgroundColor: "#000000",
+    padding: 15,
+    borderRadius: 8,
   },
-
-  card:{
-    backgroundColor:"rgba(255,255,255,0.95)",
-    padding:25,
-    borderRadius:20,
-    elevation:10
+  buttonText: {
+    color: "#ffffff",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: "bold",
   },
-
-  title:{
-    fontSize:22,
-    fontWeight:"bold",
-    marginBottom:20,
-    textAlign:"center"
+  buttonDisabled: {},
+  link: {
+    textAlign: "center",
+    marginTop: 20,
   },
-
-  inputBox:{
-    flexDirection:"row",
-    alignItems:"center",
-    borderWidth:1,
-    borderColor:"#ddd",
-    borderRadius:12,
-    paddingHorizontal:12,
-    marginBottom:15
-  },
-
-  input:{
-    flex:1,
-    padding:12,
-    fontSize:16
-  },
-
-  button:{
-    backgroundColor:"#1e3a8a",
-    padding:15,
-    borderRadius:12,
-    alignItems:"center",
-    marginTop:10
-  },
-
-  buttonText:{
-    color:"#fff",
-    fontSize:16,
-    fontWeight:"bold"
-  },
-
-  registerText:{
-    textAlign:"center",
-    marginTop:18,
-    color:"#555"
-  },
-
-  registerLink:{
-    color:"#2563eb",
-    fontWeight:"bold"
-  }
-
 });
