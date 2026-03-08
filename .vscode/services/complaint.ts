@@ -32,18 +32,15 @@ export const submitComplaint = async (data: any) => {
     } as any);
   });
 
-  // Add document files
-  data.evidence.documents.forEach((uri: string) => {
-    formData.append("documents", {
-      uri,
-      name: uri.split("/").pop() || "document.pdf",
-      type: "application/pdf",
-    } as any);
-  });
-
-  return API.post("/api/complaints", formData, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  try {
+    const response = await API.post("/api/complaints", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return response;
+  } catch (error: any) {
+    console.log("Message:", JSON.stringify(error.response?.data));
+    throw error;
+  }
 };
 export const getMyComplaints = (userId: string) => {
   return API.get(`/api/complaints/my/${userId}`);

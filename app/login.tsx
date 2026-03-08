@@ -31,7 +31,6 @@ export default function LoginScreen() {
       return;
     }
 
-
     try {
       setLoading(true);
       const response = await loginUser({
@@ -40,16 +39,19 @@ export default function LoginScreen() {
       });
 
       console.log("Login success", response.data);
-      const isAdmin = response?.data?.isAdmin 
+      const isAdmin = response?.data?.isAdmin;
       const userData = response.data;
-      await AsyncStorage.setItem("user",JSON.stringify({
-        username:userData?.username,
-        email:userData?.email,
-        phone:userData?.phone,
-        pan:userData?.pan,
-        userId:userData?.userId,
-        isAdmin:userData?.isAdmin,
-      }));
+      await AsyncStorage.setItem(
+        "user",
+        JSON.stringify({
+          username: userData?.username,
+          email: userData?.email,
+          phone: userData?.phone,
+          pan: userData?.pan,
+          userId: userData?._id,
+          isAdmin: userData?.isAdmin,
+        }),
+      );
       setEmail("");
       setPassword("");
       if (isAdmin) {

@@ -1,7 +1,6 @@
 import { submitComplaint } from "@/.vscode/services/complaint";
 import { Picker } from "@react-native-picker/picker";
 import { ResizeMode, Video } from "expo-av";
-import * as DocumentPicker from "expo-document-picker";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
@@ -48,32 +47,31 @@ export default function ComplaintScreen() {
   }, []);
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ["images"],
       quality: 1,
+      allowsMultipleSelection: true,
     });
 
     if (!result.canceled) {
-      setImages((prev) => [...prev, result.assets[0].uri]);
+      setImages((prev) => [
+        ...prev,
+        ...result.assets.map((asset) => asset.uri),
+      ]);
     }
   };
 
   // 🎥 Pick Video
   const pickVideo = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+      mediaTypes: ["videos"],
+      allowsMultipleSelection: true,
     });
 
     if (!result.canceled) {
-      setVideos((prev) => [...prev, result.assets[0].uri]);
-    }
-  };
-
-  // 📄 Pick Document
-  const pickDocument = async () => {
-    const result = await DocumentPicker.getDocumentAsync();
-
-    if (result.assets && result.assets.length > 0) {
-      setDocuments((prev) => [...prev, result.assets[0].uri]);
+      setVideos((prev) => [
+        ...prev,
+        ...result.assets.map((asset) => asset.uri),
+      ]);
     }
   };
 
@@ -103,7 +101,7 @@ export default function ComplaintScreen() {
       const userData = await AsyncStorage.getItem("user");
       const parsedUser = JSON.parse(userData || "{}");
       const response = await submitComplaint({
-        userId: parsedUser._id,
+        userId: parsedUser.userId,
         reportedBy: name,
         phone: "+91" + phone,
         email,
@@ -115,7 +113,6 @@ export default function ComplaintScreen() {
         evidence: {
           images,
           videos,
-          documents,
         },
       });
 
@@ -130,7 +127,6 @@ export default function ComplaintScreen() {
       setDate(new Date().toISOString().split("T")[0]); // Reset to today
       setImages([]);
       setVideos([]);
-      setDocuments([]);
       // On mobile, use Alert with callback
       Alert.alert("Success", "Complaint Registered Successfully", [
         {
@@ -146,7 +142,7 @@ export default function ComplaintScreen() {
         "Something went wrong";
       Alert.alert("Error", errorMessage);
     } finally {
-      setLoading(false);   
+      setLoading(false);
     }
   };
 
@@ -259,11 +255,6 @@ export default function ComplaintScreen() {
             <Pressable style={styles.actionButton} onPress={pickVideo}>
               <Text style={styles.actionText}>🎥 Video</Text>
             </Pressable>
-
-            {/* Do we really need Document upload ??*/}
-            {/* <Pressable style={styles.actionButton} onPress={pickDocument}>
-              <Text style={styles.actionText}>📄 File</Text>
-            </Pressable> */}
           </View>
 
           {/* Image previews */}
@@ -282,13 +273,6 @@ export default function ComplaintScreen() {
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
             />
-          ))}
-
-          {/* Documents */}
-          {documents.map((uri, index) => (
-            <Text key={index} style={styles.documentItem}>
-              📄 {uri.split("/").pop()}
-            </Text>
           ))}
         </View>
 

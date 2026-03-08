@@ -1,14 +1,23 @@
 import {
   getAllComplaints,
   updateComplaintStatus,
-} from "@/.vscode/services/admin"
+} from "@/.vscode/services/admin";
 import { Ionicons } from "@expo/vector-icons";
+import { ResizeMode, Video } from "expo-av";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
-import {ActivityIndicator,Alert,FlatList,StyleSheet,Text,TouchableOpacity,View,Modal
+import {
+  ActivityIndicator,
+  Alert,
+  FlatList,
+  Image,
+  Modal,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { Image } from "react-native";
-import { Video,ResizeMode } from "expo-av";
 import { RefreshControl } from "react-native-gesture-handler";
 
 export default function AdminScreen() {
@@ -58,14 +67,15 @@ export default function AdminScreen() {
   };
 
   const isImage = (url: string) =>
-    url?.includes(".jpg") || url?.includes(".jpeg") || url?.includes(".png");
+    url?.match(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i) !== null ||
+    url?.includes("/image/upload/"); // ✅ Cloudinary image URLs always have this
 
   const isVideo = (url: string) =>
-    url?.includes(".mp4") || url?.includes(".mov");
+    url?.match(/\.(mp4|mov|webm)(\?|$)/i) !== null ||
+    url?.includes("/video/upload/"); // ✅ Cloudinary video URLs always have this
 
   const renderItem = ({ item }: any) => (
     <View style={[styles.card, item.isEmergency && styles.emergencyCard]}>
-
       {item.isEmergency && (
         <Text style={styles.emergencyBadge}>🚨 EMERGENCY</Text>
       )}
@@ -82,27 +92,40 @@ export default function AdminScreen() {
       <Text style={styles.label}>Status:</Text>
       <Text style={styles.status}>{item.status}</Text>
 
-      {/* Evidence preview */}
-      {item.evidence && (
-        <TouchableOpacity
-          onPress={() => {
-            setSelectedEvidence(item.evidence);
-            setModalVisible(true);
-          }}
-        >
-          {isImage(item.evidence) && (
-            <Image source={{ uri: item.evidence }} style={styles.image} />
-          )}
+      {/* ✅ Show images */}
+      {item.evidence?.images?.length > 0 && (
+        <View>
+          <Text style={styles.label}>Images:</Text>
+          <ScrollView horizontal>
+            {item.evidence.images.map((url: string, index: number) => (
+              <TouchableOpacity
+                key={index}
+                onPress={() => {
+                  setSelectedEvidence(url);
+                  setModalVisible(true);
+                }}
+              >
+                <Image source={{ uri: url }} style={styles.image} />
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      )}
 
-          {isVideo(item.evidence) && (
+      {/* ✅ Show videos */}
+      {item.evidence?.videos?.length > 0 && (
+        <View>
+          <Text style={styles.label}>Videos:</Text>
+          {item.evidence.videos.map((url: string, index: number) => (
             <Video
-              source={{ uri: item.evidence }}
+              key={index}
+              source={{ uri: url }}
               style={styles.video}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
             />
-          )}
-        </TouchableOpacity>
+          ))}
+        </View>
       )}
 
       <View style={styles.buttonRow}>
@@ -119,13 +142,6 @@ export default function AdminScreen() {
         >
           <Text style={styles.btnText}>Reject</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.pendingBtn}
-          onPress={() => handleUpdateStatus(item._id, "Pending")}
-        >
-          <Text style={styles.btnText}>Pending</Text>
-        </TouchableOpacity>
-        
       </View>
     </View>
   );
@@ -141,16 +157,14 @@ export default function AdminScreen() {
 
   return (
     <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-              
-              <Text style={styles.headerTitle}>Admin Dashboard</Text>
-              <View style={{ width: 28 }} />
-              <TouchableOpacity onPress={() => router.push("/admin/adminsettings")}>
-                <Ionicons name="settings-outline" size={26} color="#000" />
-              </TouchableOpacity>
-            </View>
-            
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Admin Dashboard</Text>
+        <View style={{ width: 28 }} />
+        <TouchableOpacity onPress={() => router.push("/admin/adminsettings")}>
+          <Ionicons name="settings-outline" size={26} color="#000" />
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         data={complaints}
@@ -186,7 +200,6 @@ export default function AdminScreen() {
               style={styles.fullVideo}
               resizeMode={ResizeMode.CONTAIN}
               useNativeControls
-            
             />
           )}
         </View>
@@ -249,7 +262,7 @@ const styles = StyleSheet.create({
   },
 
   image: {
-    width: "100%",
+    width: 200,
     height: 180,
     marginTop: 10,
     borderRadius: 8,
@@ -326,7 +339,7 @@ const styles = StyleSheet.create({
     marginLeft: 35,
   },
 
- fullImage: {
+  fullImage: {
     width: "100%",
     height: "80%",
   },
@@ -342,5 +355,4 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "48%",
   },
-
 });

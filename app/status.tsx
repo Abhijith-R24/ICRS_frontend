@@ -1,8 +1,8 @@
 import { getMyComplaints } from "@/.vscode/services/complaint"; // adjust path if needed
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
-import { useCallback,useEffect, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
+import { router } from "expo-router";
+import { useCallback, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -37,7 +37,7 @@ export default function StatusPage() {
         return;
       }
       const parsedUser = JSON.parse(userData);
-      const response = await getMyComplaints(parsedUser._id);
+      const response = await getMyComplaints(parsedUser.userId);
       const data = Array.isArray(response.data)
         ? response.data
         : response.data.complaints || [];
@@ -56,9 +56,11 @@ export default function StatusPage() {
     }
   }, []);
 
-  useFocusEffect(useCallback(() => {
-    fetchComplaints();
-  }, [fetchComplaints]));
+  useFocusEffect(
+    useCallback(() => {
+      fetchComplaints();
+    }, [fetchComplaints]),
+  );
   const onRefresh = () => {
     setRefreshing(true);
     fetchComplaints();
