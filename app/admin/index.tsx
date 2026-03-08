@@ -119,6 +119,13 @@ export default function AdminScreen() {
         >
           <Text style={styles.btnText}>Reject</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.pendingBtn}
+          onPress={() => handleUpdateStatus(item._id, "Pending")}
+        >
+          <Text style={styles.btnText}>Pending</Text>
+        </TouchableOpacity>
+        
       </View>
     </View>
   );
@@ -328,4 +335,12 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "80%",
   },
+
+  pendingBtn: {
+    backgroundColor: "orange",
+    padding: 10,
+    borderRadius: 8,
+    width: "48%",
+  },
+
 });
