@@ -99,7 +99,7 @@ export default function LoginScreen() {
         disabled={!isFormValid || loading}
       >
         {loading ? (
-          <Text style={styles.buttonText}>Loginging in..</Text>
+          <Text style={styles.buttonText}>Logging in..</Text>
         ) : (
           <Text style={styles.buttonText}>Login</Text>
         )}
