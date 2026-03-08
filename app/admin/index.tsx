@@ -144,10 +144,10 @@ export default function AdminScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.investigatingBtn}
-          onPress={() => handleUpdateStatus(item._id, "Investigating")}
+          style={styles.completedBtn}
+          onPress={() => handleUpdateStatus(item._id, "Completed")}
         >
-          <Text style={styles.btnText}>Investigating</Text>
+          <Text style={styles.btnText}>Completed</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -288,7 +288,7 @@ const styles = StyleSheet.create({
   },
 
   approveBtn: {
-    backgroundColor: "green",
+    backgroundColor: "blue",
     padding: 10,
     borderRadius: 8,
     width: "48%",
@@ -356,8 +356,8 @@ const styles = StyleSheet.create({
     height: "80%",
   },
 
-  investigatingBtn: {
-    backgroundColor: "orange",
+  completedBtn: {
+    backgroundColor: "green",
     padding: 10,
     borderRadius: 8,
     width: "48%",

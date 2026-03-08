@@ -69,12 +69,12 @@ export default function StatusPage() {
   //  Status color
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "Investigating":
-        return "orange";
       case "Approved":
-        return "green";
+        return "blue";
       case "Rejected":
         return "red";
+      case "Completed":
+        return "green";
       default:
         return "blue";
     }
