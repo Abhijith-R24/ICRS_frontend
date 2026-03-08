@@ -3,9 +3,13 @@ import { router } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert, StyleSheet, Text, TextInput, TouchableOpacity, View
+  Alert,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
 
 export default function RegisterScreen() {
   const [fullName, setFullName] = useState("");
@@ -77,7 +81,7 @@ export default function RegisterScreen() {
         error?.response?.data?.message ||
         error?.message ||
         "Something went wrong";
-      Alert.alert("Registration Failed", errorMessage);
+      Alert.alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -255,6 +259,5 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     opacity: 0.6,
 
-  },
-})
-  ;
+  }
+});
