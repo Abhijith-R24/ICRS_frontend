@@ -3,6 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   StyleSheet,
   Text,
@@ -97,12 +98,12 @@ export default function LoginScreen() {
         style={[styles.button, (!isFormValid || loading) && { opacity: 0.6 }]}
         onPress={handleSubmit}
         disabled={!isFormValid || loading}
-      >
-        {loading ? (
-          <Text style={styles.buttonText}>Logging in..</Text>
-        ) : (
-          <Text style={styles.buttonText}>Login</Text>
-        )}
+      >{loading ? ( 
+         <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Login</Text>
+                )}
+        
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.push("/register")}>

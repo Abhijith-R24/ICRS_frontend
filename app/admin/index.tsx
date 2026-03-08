@@ -142,6 +142,13 @@ export default function AdminScreen() {
         >
           <Text style={styles.btnText}>Reject</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.investigatingBtn}
+          onPress={() => handleUpdateStatus(item._id, "Investigating")}
+        >
+          <Text style={styles.btnText}>Investigating</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -349,7 +356,7 @@ const styles = StyleSheet.create({
     height: "80%",
   },
 
-  pendingBtn: {
+  investigatingBtn: {
     backgroundColor: "orange",
     padding: 10,
     borderRadius: 8,
