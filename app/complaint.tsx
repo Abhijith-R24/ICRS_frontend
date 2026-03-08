@@ -102,8 +102,8 @@ export default function ComplaintScreen() {
     try {
       const userData = await AsyncStorage.getItem("user");
       const parsedUser = JSON.parse(userData || "{}");
-     const response = await submitComplaint({
-        userId:parsedUser.userId,
+      const response = await submitComplaint({
+        userId: parsedUser._id,
         reportedBy: name,
         phone: "+91" + phone,
         email,
@@ -146,7 +146,7 @@ export default function ComplaintScreen() {
         "Something went wrong";
       Alert.alert("Error", errorMessage);
     } finally {
-      setLoading(false);
+      setLoading(false);   
     }
   };
 
@@ -260,9 +260,10 @@ export default function ComplaintScreen() {
               <Text style={styles.actionText}>🎥 Video</Text>
             </Pressable>
 
-            <Pressable style={styles.actionButton} onPress={pickDocument}>
+            {/* Do we really need Document upload ??*/}
+            {/* <Pressable style={styles.actionButton} onPress={pickDocument}>
               <Text style={styles.actionText}>📄 File</Text>
-            </Pressable>
+            </Pressable> */}
           </View>
 
           {/* Image previews */}

@@ -31,8 +31,7 @@ export default function LoginScreen() {
       return;
     }
 
-    // If everything is valid → Navigate
-    // router.replace("/dashboard");
+
     try {
       setLoading(true);
       const response = await loginUser({
