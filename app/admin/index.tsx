@@ -145,9 +145,9 @@ export default function AdminScreen() {
 
         <TouchableOpacity
           style={styles.completedBtn}
-          onPress={() => handleUpdateStatus(item._id, "Completed")}
+          onPress={() => handleUpdateStatus(item._id, "Resolved")}
         >
-          <Text style={styles.btnText}>Completed</Text>
+          <Text style={styles.btnText}>Resolved</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -291,14 +291,14 @@ const styles = StyleSheet.create({
     backgroundColor: "blue",
     padding: 10,
     borderRadius: 8,
-    width: "48%"
+    width: "30%",
   },
 
   rejectBtn: {
     backgroundColor: "red",
     padding: 10,
     borderRadius: 8,
-    width: "48%",
+    width: "30%",
   },
 
   btnText: {
@@ -360,7 +360,6 @@ const styles = StyleSheet.create({
     backgroundColor: "green",
     padding: 10,
     borderRadius: 8,
-    width: "48%",
-    alignItems:"center"
+    width: "30%",
   },
 });
