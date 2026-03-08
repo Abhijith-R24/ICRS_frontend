@@ -291,7 +291,7 @@ const styles = StyleSheet.create({
     backgroundColor: "blue",
     padding: 10,
     borderRadius: 8,
-    width: "48%",
+    width: "48%"
   },
 
   rejectBtn: {
@@ -361,5 +361,6 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 8,
     width: "48%",
+    alignItems:"center"
   },
 });
