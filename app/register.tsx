@@ -253,7 +253,7 @@ const styles = StyleSheet.create({
     textAlign: "left",
   },
   buttonDisabled: {
-    opacity: 100,
+    opacity: 0.6,
 
   },
 })
