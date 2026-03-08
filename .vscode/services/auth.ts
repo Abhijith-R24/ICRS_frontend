@@ -5,5 +5,6 @@ export const loginUser = (data: any) => {
 };
 
 export const registerUser = (data: any) => {
+  console.log("Registering user with data:", data);
   return API.post("/api/auth/register", data);
 };
