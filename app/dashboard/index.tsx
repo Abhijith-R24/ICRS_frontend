@@ -99,10 +99,10 @@ export default function DashboardScreen() {
           <Text style={styles.actionText}>Track Case</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionCard}>
+        {/* <TouchableOpacity style={styles.actionCard}>
           <MaterialIcons name="warning" size={30} color="#fff" />
           <Text style={styles.actionText}>Emergency</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Statistics */}
@@ -137,9 +137,7 @@ export default function DashboardScreen() {
       ) : (
         <FlatList
           data={complaints.slice(0, 5)} // Show last 5
-          keyExtractor={(item) =>
-            item._id || item.id || item._id.toString()
-          }
+          keyExtractor={(item) => item._id || item.id || item._id.toString()}
           renderItem={({ item }) => (
             <View style={styles.reportCard}>
               <Text style={styles.reportType}>
