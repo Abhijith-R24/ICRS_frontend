@@ -76,6 +76,7 @@ export default function ComplaintScreen() {
   };
 
   const handleSubmit = async () => {
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     // Validate all fields
     if (
       !name ||
@@ -87,6 +88,10 @@ export default function ComplaintScreen() {
       !crimeType
     ) {
       Alert.alert("Error", "Please fill all required fields");
+      return;
+    }
+    if (!emailPattern.test(email)) {
+      Alert.alert("Error", "Please enter a valid email address");
       return;
     }
 
