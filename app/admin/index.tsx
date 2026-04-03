@@ -19,6 +19,15 @@ import {
   View,
 } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
+import { Picker } from "@react-native-picker/picker";
+
+ const rejectReasons = [
+    "Incomplete Information",
+    "Irrelevant Content",
+    "Duplicate Complaint",
+    "False information",
+    "Other",
+  ];
 
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
@@ -27,6 +36,12 @@ export default function AdminScreen() {
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
+  const [selectedAction, setSelectedAction] = useState<"Approved" | "Rejected" | null>(null);
+  const [comment, setComment] = useState("");
+  const [selectedReason, setSelectedReason] = useState("");
+ 
   const fetchComplaints = async () => {
     try {
       setLoading(true);
