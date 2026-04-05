@@ -2,46 +2,49 @@ import {
   getAllComplaints,
   updateComplaintStatus,
 } from "@/.vscode/services/admin";
-import { Ionicons } from "@expo/vector-icons";
-import { ResizeMode, Video } from "expo-av";
-import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
-  Modal,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
+  Image,
+  Modal,
+  TextInput,
 } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import { RefreshControl } from "react-native-gesture-handler";
 import { Picker } from "@react-native-picker/picker";
+import { router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
- const rejectReasons = [
-    "Incomplete Information",
-    "Irrelevant Content",
-    "Duplicate Complaint",
-    "False information",
-    "Other",
-  ];
+// Predefined Reject Reasons
+const rejectReasons = [
+  "Insufficient evidence",
+  "Invalid complaint",
+  "Duplicate report",
+  "Out of jurisdiction",
+  "False information",
+];
 
 export default function AdminScreen() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
   const [selectedEvidence, setSelectedEvidence] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
+  // New States
   const [actionModalVisible, setActionModalVisible] = useState(false);
   const [selectedComplaintId, setSelectedComplaintId] = useState<string | null>(null);
   const [selectedAction, setSelectedAction] = useState<"Approved" | "Rejected" | null>(null);
   const [comment, setComment] = useState("");
   const [selectedReason, setSelectedReason] = useState("");
- 
+
   const fetchComplaints = async () => {
     try {
       setLoading(true);
@@ -70,10 +73,33 @@ export default function AdminScreen() {
     fetchComplaints();
   };
 
-  const handleUpdateStatus = async (id: string, status: string) => {
+  // Updated Status Handler
+  const handleUpdateStatus = async () => {
+    if (!selectedComplaintId || !selectedAction) return;
+
+    // Mandatory validation for reject
+    if (selectedAction === "Rejected" && !selectedReason && !comment.trim()) {
+      Alert.alert("Error", "Please provide a reason for rejection");
+      return;
+    }
+
+    const finalComment =
+      selectedAction === "Rejected"
+        ? `${selectedReason ? selectedReason + " - " : ""}${comment}`
+        : comment;
+
     try {
-      await updateComplaintStatus(id, status);
-      Alert.alert("Success", `Marked as ${status}`);
+      await updateComplaintStatus(selectedComplaintId, {
+        status: selectedAction,
+        comment: finalComment,
+      });
+
+      Alert.alert("Success", `Marked as ${selectedAction}`);
+
+      setActionModalVisible(false);
+      setComment("");
+      setSelectedReason("");
+
       fetchComplaints();
     } catch (error) {
       console.log("Update error:", error);
@@ -81,16 +107,27 @@ export default function AdminScreen() {
     }
   };
 
-  const isImage = (url: string) =>
-    url?.match(/\.(jpg|jpeg|png|webp|gif)(\?|$)/i) !== null ||
-    url?.includes("/image/upload/"); // ✅ Cloudinary image URLs always have this
+  const isImage = (url: any) =>{
+    if(!url) return false;
+    const value = typeof url === "string" ? url : url?.uri;
+    return (
+      typeof value=== "string" &&
+      (value.includes(".jpg") || value.includes(".jpeg") || value.includes(".png"))
+    );
+  };
 
-  const isVideo = (url: string) =>
-    url?.match(/\.(mp4|mov|webm)(\?|$)/i) !== null ||
-    url?.includes("/video/upload/"); // ✅ Cloudinary video URLs always have this
+  const isVideo = (url: any) =>{
+    if(!url) return false;
+    const value =typeof url === "string" ? url : url?.uri;
+    return (
+      typeof value === "string" &&
+      (value.includes(".mp4") || value.includes(".mov"))
+    );
+  };
 
   const renderItem = ({ item }: any) => (
     <View style={[styles.card, item.isEmergency && styles.emergencyCard]}>
+
       {item.isEmergency && (
         <Text style={styles.emergencyBadge}>🚨 EMERGENCY</Text>
       )}
@@ -107,62 +144,50 @@ export default function AdminScreen() {
       <Text style={styles.label}>Status:</Text>
       <Text style={styles.status}>{item.status}</Text>
 
-      {/* ✅ Show images */}
-      {item.evidence?.images?.length > 0 && (
-        <View>
-          <Text style={styles.label}>Images:</Text>
-          <ScrollView horizontal>
-            {item.evidence.images.map((url: string, index: number) => (
-              <TouchableOpacity
-                key={index}
-                onPress={() => {
-                  setSelectedEvidence(url);
-                  setModalVisible(true);
-                }}
-              >
-                <Image source={{ uri: url }} style={styles.image} />
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-      )}
+      {/* Evidence */}
+      {item.evidence && (
+        <TouchableOpacity
+          onPress={() => {
+            setSelectedEvidence(item.evidence);
+            setModalVisible(true);
+          }}
+        >
+          {isImage(item.evidence) && (
+            <Image source={{ uri: item.evidence }} style={styles.image} />
+          )}
 
-      {/* ✅ Show videos */}
-      {item.evidence?.videos?.length > 0 && (
-        <View>
-          <Text style={styles.label}>Videos:</Text>
-          {item.evidence.videos.map((url: string, index: number) => (
+          {isVideo(item.evidence) && (
             <Video
-              key={index}
-              source={{ uri: url }}
+              source={{ uri: item.evidence }}
               style={styles.video}
               useNativeControls
               resizeMode={ResizeMode.CONTAIN}
             />
-          ))}
-        </View>
+          )}
+        </TouchableOpacity>
       )}
 
       <View style={styles.buttonRow}>
         <TouchableOpacity
           style={styles.approveBtn}
-          onPress={() => handleUpdateStatus(item._id, "Approved")}
+          onPress={() => {
+            setSelectedComplaintId(item._id);
+            setSelectedAction("Approved");
+            setActionModalVisible(true);
+          }}
         >
           <Text style={styles.btnText}>Approve</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={styles.rejectBtn}
-          onPress={() => handleUpdateStatus(item._id, "Rejected")}
+          onPress={() => {
+            setSelectedComplaintId(item._id);
+            setSelectedAction("Rejected");
+            setActionModalVisible(true);
+          }}
         >
           <Text style={styles.btnText}>Reject</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.completedBtn}
-          onPress={() => handleUpdateStatus(item._id, "Resolved")}
-        >
-          <Text style={styles.btnText}>Resolved</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -179,14 +204,14 @@ export default function AdminScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Admin Dashboard</Text>
-        <View style={{ width: 28 }} />
-        <TouchableOpacity onPress={() => router.push("/admin/adminsettings")}>
-          <Ionicons name="settings-outline" size={26} color="#000" />
+      <Text style={styles.headerTitle}>Admin Dashboard</Text>
+      <View style={{width:28}}/>
+      <TouchableOpacity onPress={()=>router.push("/admin/adminsettings")}>
+        <Ionicons name="settings-outline" size={26} color="black"/>
         </TouchableOpacity>
-      </View>
+        </View>
+
 
       <FlatList
         data={complaints}
@@ -198,7 +223,7 @@ export default function AdminScreen() {
         contentContainerStyle={{ paddingBottom: 20 }}
       />
 
-      {/* Fullscreen Evidence */}
+      {/* Evidence Modal */}
       <Modal visible={modalVisible} transparent={true}>
         <View style={styles.modalContainer}>
           <TouchableOpacity
@@ -209,21 +234,72 @@ export default function AdminScreen() {
           </TouchableOpacity>
 
           {selectedEvidence && isImage(selectedEvidence) && (
-            <Image
-              source={{ uri: selectedEvidence }}
-              style={styles.fullImage}
-              resizeMode="contain"
-            />
+            <Image source={{ uri: selectedEvidence }} style={styles.fullImage} resizeMode="contain" />
           )}
 
           {selectedEvidence && isVideo(selectedEvidence) && (
             <Video
               source={{ uri: selectedEvidence }}
               style={styles.fullVideo}
-              resizeMode={ResizeMode.CONTAIN}
               useNativeControls
+              resizeMode={ResizeMode.CONTAIN}
             />
           )}
+        </View>
+      </Modal>
+
+      {/* ✅ ACTION MODAL */}
+      <Modal visible={actionModalVisible} transparent animationType="slide">
+        <View style={styles.modalOverlay}>
+          <View style={styles.actionModal}>
+            <Text style={styles.modalTitle}>
+              {selectedAction} Complaint
+            </Text>
+
+            {/* Dropdown for Reject */}
+            {selectedAction === "Rejected" && (
+              <>
+                <Text style={{ marginBottom: 5 }}>Select Reason:</Text>
+                <Picker
+                  selectedValue={selectedReason}
+                  onValueChange={(itemValue) => setSelectedReason(itemValue)}
+                >
+                  <Picker.Item label="Select a reason..." value="" />
+                  {rejectReasons.map((reason, index) => (
+                    <Picker.Item key={index} label={reason} value={reason} />
+                  ))}
+                </Picker>
+              </>
+            )}
+
+            <TextInput
+              placeholder="Additional comments..."
+              value={comment}
+              onChangeText={setComment}
+              multiline
+              style={styles.input}
+            />
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.cancelBtn}
+                onPress={() => {
+                  setActionModalVisible(false);
+                  setComment("");
+                  setSelectedReason("");
+                }}
+              >
+                <Text style={styles.btnText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.submitBtn}
+                onPress={handleUpdateStatus}
+              >
+                <Text style={styles.btnText}>Submit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </Modal>
     </View>
@@ -231,18 +307,8 @@ export default function AdminScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: "#f4f6f9",
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 20,
-  },
+  container: { flex: 1, padding: 20, backgroundColor: "#f4f6f9" },
+  title: { fontSize: 24, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
 
   card: {
     backgroundColor: "#fff",
@@ -258,123 +324,98 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff5f5",
   },
 
-  emergencyBadge: {
-    color: "red",
+  emergencyBadge: { color: "red", fontWeight: "bold", marginBottom: 5 },
+
+  label: { fontSize: 12, color: "#666", marginTop: 5 },
+  value: { fontSize: 15, fontWeight: "bold" },
+  status: { fontSize: 14, fontWeight: "bold", color: "blue", marginTop: 5 },
+
+  image: { width: "100%", height: 180, marginTop: 10, borderRadius: 8 },
+  video: { width: "100%", height: 180, marginTop: 10 },
+
+  buttonRow: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
+
+  approveBtn: { backgroundColor: "green", padding: 10, borderRadius: 8, width: "48%" },
+  rejectBtn: { backgroundColor: "red", padding: 10, borderRadius: 8, width: "48%" },
+
+  btnText: { color: "#fff", textAlign: "center", fontWeight: "bold" },
+
+  center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+  modalContainer: { flex: 1, backgroundColor: "black", justifyContent: "center" },
+  closeBtn: { position: "absolute", top: 40, right: 20, zIndex: 10 },
+
+  fullImage: { width: "100%", height: "80%" },
+  fullVideo: { width: "100%", height: "80%" },
+
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  actionModal: {
+    width: "85%",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 5,
-    fontSize: 14,
+    marginBottom: 10,
+    textAlign: "center",
   },
 
-  label: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 5,
-  },
-
-  value: {
-    fontSize: 15,
-    fontWeight: "bold",
-  },
-
-  status: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "blue",
-    marginTop: 5,
-  },
-
-  image: {
-    width: 200,
-    height: 180,
-    marginTop: 10,
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
     borderRadius: 8,
-  },
-
-  video: {
-    width: "100%",
-    height: 180,
+    padding: 10,
+    minHeight: 80,
+    textAlignVertical: "top",
     marginTop: 10,
   },
 
-  buttonRow: {
+  modalButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 10,
+    marginTop: 15,
   },
 
-  approveBtn: {
+  cancelBtn: {
+    backgroundColor: "gray",
+    padding: 10,
+    borderRadius: 8,
+    width: "45%",
+  },
+
+  submitBtn: {
     backgroundColor: "blue",
     padding: 10,
     borderRadius: 8,
-    width: "30%",
+    width: "45%",
   },
-
-  rejectBtn: {
-    backgroundColor: "red",
-    padding: 10,
-    borderRadius: 8,
-    width: "30%",
+  header:{
+    flexDirection:"row",
+    justifyContent:"space-between",
+    alignItems:"center",
+    padding:20,
+    backgroundColor:"#fff",
+    elevation:2,
+    marginBottom:20,
   },
-
-  btnText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "bold",
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-
-  modalContainer: {
-    flex: 1,
-    backgroundColor: "black",
-    justifyContent: "center",
-  },
-
-  closeBtn: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    zIndex: 10,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    padding: 20,
-    alignItems: "center",
-    marginBottom: 20,
-    elevation: 2,
-    backgroundColor: "#fff",
-  },
-
-  headerTitle: {
-    color: "#000000",
-    marginTop: 30,
-    fontSize: 22,
-    fontWeight: "bold",
-    textAlign: "center",
-    justifyContent: "center",
-    flex: 1,
-    marginLeft: 35,
-  },
-
-  fullImage: {
-    width: "100%",
-    height: "80%",
-  },
-
-  fullVideo: {
-    width: "100%",
-    height: "80%",
-  },
-
-  completedBtn: {
-    backgroundColor: "green",
-    padding: 10,
-    borderRadius: 8,
-    width: "30%",
+  headerTitle:{
+    color:"#000000",
+    marginTop:30,
+    fontSize:22,
+    fontWeight:"bold",
+    textAlign:"center",
+    justifyContent:"center",
+    flex:1,
+    marginLeft:35,
+    
   },
 });

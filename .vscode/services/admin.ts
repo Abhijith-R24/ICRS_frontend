@@ -6,12 +6,10 @@ export const getAllComplaints = async () => {
 };
 
 // Update complaint status
-export const updateComplaintStatus = async (id: string, status: string) => {
+export const updateComplaintStatus = async (id: string, data: { status: string; comment?: string }) => {
   return API.put(
     `https://8psmpbxw-8000.inc1.devtunnels.ms/api/admin/complaint/${id}/status`,
-    {
-      status,
-    },
+    data
   );
 };
 
